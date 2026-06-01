@@ -214,16 +214,6 @@
             background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9IiM2NDc0OGIiIGZpbGwtb3BhY2l0eT0iMC40Ii8+PC9zdmc+');
         }
 
-        #grid {
-            position: absolute;
-            inset: 0;
-            pointer-events: none;
-            opacity: .35;
-            background-image: linear-gradient(to right, #0000 9px, var(--border) 10px), linear-gradient(to bottom, #0000 9px, var(--border) 10px);
-            background-size: 10px 10px;
-            display: none
-        }
-
         #verticalSeparator {
             flex-shrink: 0;
             width: 5px;
@@ -1387,6 +1377,12 @@
         <label class="chk"><input checked="" id="dragMode" type="checkbox" /> Drag Edit</label>
         <label class="chk"><input id="showGrid" type="checkbox" /> Show Grid</label>
         <label class="chk"><input id="snapGrid" type="checkbox" /> Snap to Grid</label>
+        <span id="gridSizeControl" style="display:inline-flex;align-items:center;gap:3px;font-size:13px;opacity:0.4;pointer-events:none;">
+            Grid:
+            <button id="gridSizeDec" class="btn" style="padding:1px 7px;min-width:unset;">−</button>
+            <span id="gridSizeVal" style="min-width:28px;text-align:center;font-variant-numeric:tabular-nums;">20</span>
+            <button id="gridSizeInc" class="btn" style="padding:1px 7px;min-width:unset;">＋</button>
+        </span>
         <div class="spacer"></div>
         <button class="btn" id="themeBtn" title="Light/Dark Toggle">🌙 Theme</button>
     </header>
@@ -1394,7 +1390,6 @@
     <div id="mainContainer">
         <div id="topSection">
             <div id="stageWrap">
-                <div id="grid"></div>
                 <svg id="stage"></svg>
 
                 <!-- リンク表示制御ツールボックス -->
@@ -1476,7 +1471,7 @@
                 <div class="upload-area" id="uploadArea">
                     <div style="font-size:48px; margin-bottom:1rem;">📁</div>
                     <p>Drag & Drop a file<br />or<br />Click to select</p>
-                    <input accept="image/*,.tif,.tiff,.csv,.json,.txt" id="insertionFile" style="display:none;"
+                    <input accept="image/*,.tif,.tiff,.csv,.json,.txt,.msa,.emsa,.ems" id="insertionFile" style="display:none;"
                         type="file" />
                 </div>
                 <div id="formatSelector" style="display:none;">
@@ -1497,6 +1492,10 @@
                         <div class="format-option" data-format="text">
                             <div class="format-icon">📝</div>
                             <div>Text</div>
+                        </div>
+                        <div class="format-option" data-format="emsa">
+                            <div class="format-icon">📈</div>
+                            <div>EMSA Spectrum</div>
                         </div>
                     </div>
                 </div>
@@ -1563,7 +1562,8 @@
                 </div>
 
                 <!-- Generateボタン -->
-                <div style="display:flex; justify-content:flex-end; margin-top:0.8rem;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.8rem;">
+                    <button class="btn" id="geminiKeyBtn">🔑 Gemini API Key</button>
                     <button class="btn primary" id="generateSummaryBtn">🚀 Generate</button>
                 </div>
                 <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-top:0.5rem;">
@@ -1710,7 +1710,7 @@
                         <ul style="padding-left: 1.5rem;">
                             <li><strong>API Key設定:</strong> ヘッダーの <span
                                     style="background: var(--chip); color: var(--chip-ink); padding: 0.1rem 0.3rem; border-radius: 4px; font-family: monospace;">🔑
-                                    Gemini API Key</span> からキーを設定してください（ブラウザに保存されます）。</li>
+                                    Gemini API Key</span> からキーを設定してください（ブラウザのローカルストレージに保存されます）。</li>
                         </ul>
 
                         <h3 style="font-size: 1.1rem; color: var(--accent); margin: 1.2rem 0 0.5rem;">📊 Metadata Export
@@ -1952,7 +1952,7 @@
                         <ul style="padding-left: 1.5rem;">
                             <li><strong>API Key:</strong> Set your key via <span
                                     style="background: var(--chip); color: var(--chip-ink); padding: 0.1rem 0.3rem; border-radius: 4px; font-family: monospace;">🔑
-                                    Gemini API Key</span> header button.</li>
+                                    Gemini API Key</span> header button. (Saved in browser localStorage — persists across sessions.)</li>
                         </ul>
 
                         <h3 style="font-size: 1.1rem; color: var(--accent); margin: 1.2rem 0 0.5rem;">📊 Metadata Export
@@ -2118,15 +2118,89 @@
     <script src="https://cdn.jsdelivr.net/npm/utif@3.1.0/UTIF.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
+    <!-- [SECURITY] DOMPurify: XSS sanitizer for marked.parse() output -->
+    <!-- SRI hash: generate at https://www.srihash.org/ and add integrity="sha384-..." crossorigin="anonymous" -->
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.0/dist/purify.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
     <script>
         ; (function () {
+
+            // ============================================================
+            // UTILITY FUNCTIONS
+            // ============================================================
+
+            /**
+             * HTMLエスケープ。esc() の別名として全スクリプトブロックで共用可能。
+             * （IIFE内では esc() として参照する）
+             */
+            // ※ esc() は後方で定義済み (line ~6402)。ここでは下記ヘルパーを追加。
+
+            /**
+             * ファイルをブラウザでダウンロードさせる。
+             * @param {string|ArrayBuffer} content - ダウンロード内容
+             * @param {string} filename - ファイル名
+             * @param {string} [mimeType="application/octet-stream"] - MIME タイプ
+             */
+            function downloadFile(content, filename, mimeType = 'application/octet-stream') {
+                const blob = new Blob([content], { type: mimeType });
+                const url  = URL.createObjectURL(blob);
+                const a    = document.createElement('a');
+                a.href     = url;
+                a.download = filename;
+                a.click();
+                URL.revokeObjectURL(url);
+            }
+            // 他の <script> ブロックからも参照できるよう window に公開
+            window.downloadFile = downloadFile;
+
+            /**
+             * 今日の日付を "YYYY-MM-DD" 形式で返す（エクスポートファイル名用）。
+             */
+            function todayString() {
+                return new Date().toISOString().slice(0, 10);
+            }
+            // 他の <script> ブロックからも参照できるよう window に公開
+            window.todayString = todayString;
+
+            // ============================================================
+            // SVG / D3 SETUP
+            // ============================================================
+
             const svg = d3.select('#stage');
+
+            // グリッド間隔の初期値
+            let GRID_SIZE = 20;
+
+            // SVGグリッド（patternベース・ズーム追従）
+            const defs = svg.append('defs');
+            const gridPattern = defs.append('pattern')
+                .attr('id', 'svgGrid')
+                .attr('width', GRID_SIZE)
+                .attr('height', GRID_SIZE)
+                .attr('patternUnits', 'userSpaceOnUse');
+            gridPattern.append('path')
+                .attr('d', `M ${GRID_SIZE} 0 L 0 0 0 ${GRID_SIZE}`)
+                .attr('fill', 'none')
+                .attr('stroke', '#94a3b8')
+                .attr('stroke-width', 0.8)
+                .attr('opacity', 0.65);
+
+            const gridRect = svg.append('rect')
+                .attr('id', 'svgGridRect')
+                .attr('width', '100%')
+                .attr('height', '100%')
+                .attr('fill', 'url(#svgGrid)')
+                .attr('display', 'none');
+
             const gRoot = svg.append('g');
             const gGroups = gRoot.append('g').attr('class', 'groups');
             const gLinks = gRoot.append('g').attr('class', 'links');
             const gNodes = gRoot.append('g').attr('class', 'nodes');
-            svg.call(d3.zoom().scaleExtent([0.25, 6]).on('zoom', (e) => gRoot.attr('transform', e.transform)));
+            svg.call(d3.zoom().scaleExtent([0.25, 6]).on('zoom', (e) => {
+                gRoot.attr('transform', e.transform);
+                // グリッドpatternをズームに追従させる
+                gridPattern.attr('patternTransform', e.transform);
+            }));
 
             //
             svg.append('defs').append('marker')
@@ -2216,7 +2290,6 @@
             const transitionToInstructions = new Map();
             const eventsByInstructionId = new Map();
 
-            const $grid = document.getElementById('grid');
             const $stats = document.getElementById('stats');
             const $meta = document.getElementById('meta');
             const $seg = document.getElementById('metaSource');
@@ -2248,6 +2321,9 @@
                 localStorage.setItem(THEME_KEY, next);
             });
 
+            // ============================================================
+            // THEME
+            // ============================================================
             function initTheme() {
                 const saved = localStorage.getItem(THEME_KEY);
                 if (saved) { applyTheme(saved); return; }
@@ -2268,12 +2344,18 @@
                         $stg.classList.remove('bg-pattern-dark');
                     }
                 }
+                // SVGグリッド色をテーマに合わせて切り替え
+                gridPattern.select('path')
+                    .attr('stroke', isDark ? '#334155' : '#94a3b8');
             }
 
             // Resizers
             setupHorizontalResizer();
             setupVerticalResizer();
 
+            // ============================================================
+            // PANEL RESIZERS
+            // ============================================================
             function setupHorizontalResizer() {
                 const separator = document.getElementById('horizontalSeparator');
                 let isResizing = false;
@@ -2362,13 +2444,37 @@
             document.getElementById('dragMode').addEventListener('change', (e) => enableDrag(e.target.checked));
             document.getElementById('snapGrid').addEventListener('change', () => { });
             document.getElementById('showGrid').addEventListener('change', (e) => {
-                $grid.style.display = e.target.checked ? 'block' : 'none';
+                gridRect.attr('display', e.target.checked ? 'block' : 'none');
+                const ctrl = document.getElementById('gridSizeControl');
+                ctrl.style.opacity = e.target.checked ? '1' : '0.4';
+                ctrl.style.pointerEvents = e.target.checked ? 'auto' : 'none';
             });
+            // グリッドサイズ変更
+            // ============================================================
+            // GRID
+            // ============================================================
+            function applyGridSize(size) {
+                GRID_SIZE = size;
+                gridSize = size;
+                document.getElementById('gridSizeVal').textContent = size;
+                gridPattern.attr('width', size).attr('height', size);
+                gridPattern.select('path').attr('d', `M ${size} 0 L 0 0 0 ${size}`);
+            }
+            document.getElementById('gridSizeDec').addEventListener('click', () => {
+                applyGridSize(Math.max(10, GRID_SIZE - 5));
+            });
+            document.getElementById('gridSizeInc').addEventListener('click', () => {
+                applyGridSize(Math.min(100, GRID_SIZE + 5));
+            });
+
 
             $openFileBtn.addEventListener('click', () => {
                 openMaiMLUploadModal();
             });
 
+            // ============================================================
+            // FILE LOAD / UPLOAD MODAL
+            // ============================================================
             function openMaiMLUploadModal() {
                 const modal = document.createElement('div');
                 modal.className = 'modal-overlay show';
@@ -2462,9 +2568,10 @@
                 render();
                 runAutoLayout(true);
                 updateStats();
-                // chain / parent 接続線とハッシュ検証（非同期）
-                connectChainLinks();
-                connectParentLinks();
+                // chain / parent 接続線とハッシュ検証（順序を保証するため await で直列実行）
+                // ※ await なしだと非同期の割り込みで chain/parent の表示順が乱れるため
+                await connectChainLinks();
+                await connectParentLinks();
             }
 
             async function handleMaiMLFile(file, append = false) {
@@ -3039,10 +3146,8 @@
             }
 
 
-            // chain接続線の描画とハッシュ検証
-
             // ============================================================
-            // XML署名検証 (Enveloped, ECDSA P-256)
+            // CHAIN / PARENT CONNECTIONS  &  XML署名検証 (Enveloped, ECDSA P-256)
             // ============================================================
             async function verifyXmlSignature(xmlText, key, baseHtml) {
                 try {
@@ -3061,7 +3166,7 @@
                     const sigMethodAlgo = sigMethodEl?.getAttribute('Algorithm') || '';
 
                     if (sigMethodAlgo.includes('rsa')) {
-                        _updateSigBadge(key, baseHtml, 'warn', '⚠️ Unsupported (RSA Signature)');
+                        _updateSigBadge(key, baseHtml, 'warn', '⚠️ Unsupported (RSA-SHA256): verification skipped');
                         return;
                     }
 
@@ -3135,15 +3240,19 @@
                     }
                 } catch (e) {
                     console.error('Signature verification error:', e);
-                    _updateSigBadge(key, baseHtml, 'fail', '❌ Verification error: ' + e.message);
+                    // [SECURITY FIX] Use esc() to prevent XSS via error message in HTML badge
+                    _updateSigBadge(key, baseHtml, 'fail', '❌ Verification error: ' + esc(e.message));
                 }
             }
 
             function _updateSigBadge(key, baseHtml, status, message) {
                 // 「Verifying...」バッジを最終結果に置き換え
+                // ※ baseHtml（登録時点のスナップショット）ではなく、現在のマップの最新値から置換する
+                //   （connectChainLinks等で後から追加されたchainバッジを消さないため）
                 const cls = status === 'ok' ? 'ok' : status === 'fail' ? 'fail' : 'warn';
                 const badge = `<span class="chain-badge ${cls}">${message}</span>`;
-                const updated = (baseHtml || '').replace(
+                const currentHtml = documentMetadataMap.get(key) || baseHtml || '';
+                const updated = currentHtml.replace(
                     '<span class="chain-badge warn">🔏 Verifying...</span>',
                     badge
                 );
@@ -3274,14 +3383,19 @@
                             : `<span class="chain-badge warn">⚠️ Linked file not loaded</span>`;
 
                     // Document Metadataパネルの該当sourceIdのセクションにバッジを追加
-                    const savedHtml = documentMetadataMap.get(cl.sourceId);
-                    if (savedHtml !== undefined) {
-                        // chain記録のUUID行の後にバッジを挿入
+                    // ※ 複数chainがある場合に前回挿入分が消えないよう、毎回最新のHTMLを取得する
+                    const currentHtml = documentMetadataMap.get(cl.sourceId);
+                    if (currentHtml !== undefined) {
+                        // chain記録のUUID行の後にバッジを挿入（最後の</table>の直前に追加）
                         const targetUuid = cl.targetId
                             ? (window.documentInfoMap?.get(cl.targetId)?.uuid || cl.hash.slice(0, 8) + '...')
                             : cl.hash.slice(0, 8) + '...';
                         const badgeHtml = `<tr><th>chain</th><td colspan="2">${badge} → ${esc(targetUuid)}</td></tr>`;
-                        const updated = savedHtml.replace('</table>', badgeHtml + '</table>');
+                        // lastIndexOf で最後の</table>を対象にすることで複数chain時も正しく追記される
+                        const lastTableClose = currentHtml.lastIndexOf('</table>');
+                        const updated = lastTableClose !== -1
+                            ? currentHtml.slice(0, lastTableClose) + badgeHtml + currentHtml.slice(lastTableClose)
+                            : currentHtml + badgeHtml;
                         documentMetadataMap.set(cl.sourceId, updated);
                     }
                 }
@@ -3415,13 +3529,16 @@
                             ? `<span class="chain-badge fail">❌ Hash mismatch</span>`
                             : `<span class="chain-badge warn">⚠️ Parent file not loaded</span>`;
 
-                    const savedHtml = documentMetadataMap.get(pl.sourceId);
-                    if (savedHtml !== undefined) {
+                    const currentHtml = documentMetadataMap.get(pl.sourceId);
+                    if (currentHtml !== undefined) {
                         const targetUuid = pl.targetId
                             ? (window.documentInfoMap?.get(pl.targetId)?.uuid || pl.hash.slice(0, 8) + '...')
                             : pl.hash.slice(0, 8) + '...';
                         const badgeHtml = `<tr><th>parent</th><td colspan="2">${badge} → ${esc(targetUuid)}</td></tr>`;
-                        const updated = savedHtml.replace('</table>', badgeHtml + '</table>');
+                        const lastTableClose = currentHtml.lastIndexOf('</table>');
+                        const updated = lastTableClose !== -1
+                            ? currentHtml.slice(0, lastTableClose) + badgeHtml + currentHtml.slice(lastTableClose)
+                            : currentHtml + badgeHtml;
                         documentMetadataMap.set(pl.sourceId, updated);
                     }
                 }
@@ -3621,8 +3738,11 @@
                             for (let el of elements) {
                                 const n = el.getElementsByTagNameNS("http://www.maiml.org/schemas", "name")[0];
                                 const d = el.getElementsByTagNameNS("http://www.maiml.org/schemas", "description")[0];
+                                const rawId = el.getAttribute('id') || el.getAttribute('ID') || el.getAttribute('Id') || '';
+                                const resolvedId = (key && rawId) ? `${key}_${rawId}` : rawId;
                                 infoObj.others.push({
                                     tag: tag,
+                                    id: resolvedId,
                                     name: n ? n.textContent : '',
                                     description: d ? d.textContent : ''
                                 });
@@ -3750,27 +3870,40 @@
                 showFormatSelector();
             }
 
-            function showFormatSelector() {
+            async function showFormatSelector() {
                 $formatSelector.style.display = 'block';
 
-                if (currentFile) {
-                    const type = currentFile.type;
-                    const name = currentFile.name.toLowerCase();
+                if (!currentFile) return;
+                const type = currentFile.type;
+                const name = currentFile.name.toLowerCase();
 
-                    if (type.startsWith('image/') || name.endsWith('.tif') || name.endsWith('.tiff')) {
-                        selectFormat('image');
-                    } else if (name.endsWith('.csv')) {
-                        selectFormat('chart');
-                    } else if (name.endsWith('.json')) {
-                        selectFormat('table');
-                    } else if (name.endsWith('.xlsx') || name.endsWith('.xls') ||
-                        type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
-                        type === 'application/vnd.ms-excel') {
-                        selectFormat('table');
-                    } else {
-                        selectFormat('text');
-                    }
+                if (type.startsWith('image/') || name.endsWith('.tif') || name.endsWith('.tiff')) {
+                    selectFormat('image');
+                } else if (name.endsWith('.csv')) {
+                    selectFormat('chart');
+                } else if (name.endsWith('.msa') || name.endsWith('.emsa') || name.endsWith('.ems')) {
+                    selectFormat('emsa');
+                } else if (name.endsWith('.json')) {
+                    selectFormat('table');
+                } else if (name.endsWith('.xlsx') || name.endsWith('.xls') ||
+                    type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+                    type === 'application/vnd.ms-excel') {
+                    selectFormat('table');
+                } else {
+                    // 拡張子不明: ファイル先頭を読んでEMSAコンテンツ判定
+                    selectFormat('text');  // まずtextを仮選択
+                    try {
+                        const head = await currentFile.slice(0, 512).text();
+                        if (isEmsaContent(head)) selectFormat('emsa');
+                    } catch (_) { /* 読み取り失敗時はtextのまま */ }
                 }
+            }
+
+            /** ファイル先頭テキストからEMSA/MASフォーマットか判定する */
+            function isEmsaContent(head) {
+                if (/^#FORMAT\s*:/im.test(head) && /EMSA/i.test(head)) return true;
+                const keys = ['#NPOINTS', '#XUNITS', '#YUNITS', '#SPECTRUM', '#DATATYPE', '#XPERCHAN'];
+                return keys.filter(k => head.toUpperCase().includes(k)).length >= 3;
             }
 
             document.querySelectorAll('.format-option').forEach(opt => {
@@ -3809,9 +3942,13 @@
                         case 'text':
                             await renderText(file);
                             break;
+                        case 'emsa':
+                            await renderEMSA(file, $previewContent);
+                            break;
                     }
                 } catch (err) {
-                    $previewContent.innerHTML = `<p style="color:var(--warn);">Error: ${err.message}</p>`;
+                    // [SECURITY FIX] Use esc() to prevent XSS via error messages
+                    $previewContent.innerHTML = `<p style="color:var(--warn);">Error: ${esc(err.message)}</p>`;
                 }
             }
 
@@ -3996,7 +4133,172 @@
 
             async function renderText(file) {
                 const text = await file.text();
-                $previewContent.innerHTML = `<pre style="white-space:pre-wrap; font-size:12px; max-height:400px; overflow:auto;">${text}</pre>`;
+                // [SECURITY FIX] Use esc() to prevent XSS from malicious text file content
+                $previewContent.innerHTML = `<pre style="white-space:pre-wrap; font-size:12px; max-height:400px; overflow:auto;">${esc(text)}</pre>`;
+            }
+
+            // ============================================================
+            // EMSA/MAS SPECTRUM RENDERER (ISO 22029)
+            // ============================================================
+            async function renderEMSA(file, container) {
+                const text = await file.text();
+                const lines = text.split(/\r?\n/);
+
+                // --- ヘッダー解析 ---
+                const hdr = {};
+                let dataStart = -1, dataEnd = lines.length;
+
+                for (let i = 0; i < lines.length; i++) {
+                    const raw = lines[i];
+                    const upper = raw.trim().toUpperCase();
+
+                    if (upper.startsWith('#SPECTRUM')) { dataStart = i + 1; continue; }
+                    if (upper.startsWith('#ENDOFDATA') || upper.startsWith('#CHECKSUM')) { dataEnd = i; break; }
+
+                    // キーワード行 (## はユーザー定義、# は標準)
+                    if (raw.trim().startsWith('#') && !raw.trim().startsWith('##')) {
+                        const withoutHash = raw.trim().slice(1);
+                        const colonIdx = withoutHash.indexOf(':');
+                        if (colonIdx >= 0) {
+                            // キーワードは最大12文字 + 空白で埋められることがある。最初の単語を取る。
+                            const rawKey = withoutHash.slice(0, colonIdx).trim();
+                            const key = rawKey.split(/[\s\-]/)[0].toUpperCase();
+                            const value = withoutHash.slice(colonIdx + 1).trim();
+                            if (key) hdr[key] = value;
+                        }
+                    }
+                }
+
+                if (dataStart === -1) throw new Error('#SPECTRUM keyword not found — not a valid EMSA file.');
+
+                // --- データ解析 ---
+                const dataType  = (hdr['DATATYPE'] || 'Y').trim().toUpperCase();
+                const xPerChan  = parseFloat(hdr['XPERCHAN']) || 1;
+                const offset    = parseFloat(hdr['OFFSET'])   || 0;
+                const title     = hdr['TITLE']    || file.name;
+                const xUnits    = hdr['XUNITS']   || '';
+                const yUnits    = hdr['YUNITS']   || 'Intensity';
+                const xLabel    = hdr['XLABEL']   || xUnits || 'Channel';
+                const yLabel    = hdr['YLABEL']   || yUnits || 'Intensity';
+                const sigType   = hdr['SIGNALTYPE'] || '';
+
+                const xVals = [], yVals = [];
+                const dataLines = lines.slice(dataStart, dataEnd)
+                    .map(l => l.trim())
+                    .filter(l => l && !l.startsWith('#'));
+
+                if (dataType === 'XY') {
+                    for (const line of dataLines) {
+                        const parts = line.split(/[\s,;]+/).filter(Boolean);
+                        if (parts.length >= 2) {
+                            xVals.push(parseFloat(parts[0]));
+                            yVals.push(parseFloat(parts[1]));
+                        }
+                    }
+                } else {
+                    // Y のみ: X = OFFSET + XPERCHAN * チャンネル番号
+                    for (let i = 0; i < dataLines.length; i++) {
+                        const parts = dataLines[i].split(/[\s,;]+/).filter(Boolean);
+                        if (parts.length >= 1) {
+                            xVals.push(offset + xPerChan * i);
+                            yVals.push(parseFloat(parts[0]));
+                        }
+                    }
+                }
+
+                if (xVals.length === 0) throw new Error('No data points found in EMSA file.');
+
+                // --- UI構築 ---
+                container.innerHTML = '';
+
+                // タイトル
+                const titleEl = document.createElement('div');
+                titleEl.style.cssText = 'font-size:13px;font-weight:600;color:var(--accent);padding:0 4px 2px;';
+                titleEl.textContent = title;
+                container.appendChild(titleEl);
+
+                // メタ情報
+                const metaParts = [];
+                if (sigType)        metaParts.push(sigType);
+                if (hdr['DATE'])    metaParts.push(hdr['DATE']);
+                if (hdr['BEAMKV']) metaParts.push(`Beam: ${hdr['BEAMKV']} kV`);
+                if (hdr['OWNER'])   metaParts.push(`Owner: ${hdr['OWNER']}`);
+                if (metaParts.length) {
+                    const metaEl = document.createElement('div');
+                    metaEl.style.cssText = 'font-size:11px;color:var(--muted);padding:0 4px 6px;';
+                    metaEl.textContent = metaParts.join('  |  ');
+                    container.appendChild(metaEl);
+                }
+
+                // キャンバス
+                const wrap = document.createElement('div');
+                wrap.style.cssText = 'width:100%;height:300px;position:relative;';
+                const canvas = document.createElement('canvas');
+                wrap.appendChild(canvas);
+                container.appendChild(wrap);
+
+                // Chart.js でスペクトル描画
+                const accent = getComputedStyle(document.documentElement)
+                    .getPropertyValue('--accent').trim() || '#4f46e5';
+                const thinLine = xVals.length > 1000;
+
+                new Chart(canvas, {
+                    type: 'line',
+                    data: {
+                        labels: xVals,
+                        datasets: [{
+                            label: yLabel,
+                            data: yVals,
+                            borderColor: accent,
+                            backgroundColor: accent + '20',
+                            borderWidth: thinLine ? 1 : 1.5,
+                            pointRadius: 0,
+                            tension: 0,
+                            fill: true,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        animation: { duration: 150 },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false,
+                                callbacks: {
+                                    title: ctx => `${xLabel}: ${Number(xVals[ctx[0].dataIndex]).toFixed(2)} ${xUnits}`,
+                                    label: ctx => `${yLabel}: ${ctx.parsed.y}`
+                                }
+                            },
+                            zoom: {
+                                pan:  { enabled: true, mode: 'x' },
+                                zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                type: 'linear',
+                                title: { display: true, text: xLabel + (xUnits ? ` (${xUnits})` : '') },
+                                ticks: { maxTicksLimit: 10,
+                                         callback: v => Number(v).toFixed(xPerChan < 0.1 ? 2 : xPerChan < 1 ? 1 : 0) }
+                            },
+                            y: {
+                                title: { display: true, text: yLabel + (yUnits ? ` (${yUnits})` : '') },
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+
+                // データ点数と範囲
+                const infoEl = document.createElement('div');
+                infoEl.style.cssText = 'font-size:11px;color:var(--muted);padding:4px 4px 0;';
+                infoEl.textContent =
+                    `${xVals.length} points  |  `
+                    + `${xLabel}: ${xVals[0].toFixed(2)} – ${xVals[xVals.length-1].toFixed(2)} ${xUnits}`
+                    + (hdr['NPOINTS'] ? `  |  NPOINTS: ${hdr['NPOINTS']}` : '');
+                container.appendChild(infoEl);
             }
 
             $applyBtn.addEventListener('click', () => {
@@ -4116,6 +4418,9 @@
                 $stats.textContent = `PLACE: ${pc} / TRANSITION: ${tc} / Templates: ${tplCount} / Instances: ${instCount} (Saved Key: ${layoutKey()})`;
             }
 
+            // ============================================================
+            // MAIML PARSER
+            // ============================================================
             function parseMaiML(xml, sourceId) {
                 const all = Array.from(xml.getElementsByTagName('*'));
                 const attr = (el, ...names) => {
@@ -4246,12 +4551,16 @@
                     if (instances.some(i => i.id === id)) continue;
 
                     const meta = extractMetaBlock(el);
+                    const resParent = findAncestor(el, a => local(a) === 'results');
+                    const resultsRefValue = resParent ? (attr(resParent, 'id', 'ID', 'Id') || '') : '';
+
                     const rec = {
                         id,
                         originalId: rawId, // 元のIDを保存
                         role,
                         sourceId, // Export用: ソースID
                         templateRef: tplRef ? resolve(tplRef) : null,
+                        resultsRef: resultsRefValue,
                         properties: meta.properties,
                         contents: meta.contents,
                         insertions: meta.insertions,
@@ -4314,8 +4623,20 @@
                             // resultsRef 要素から ref 属性を取得
                             const resultsRefEl = Array.from(el.children || []).find(c => local(c) === 'resultsref');
                             const resultsRefValue = resultsRefEl ? (attr(resultsRefEl, 'ref', 'Ref', 'REF') || '') : '';
+                            // creatorRef / ownerRef 要素
+                            const creatorRefEl = Array.from(el.children || []).find(c => local(c) === 'creatorref');
+                            const ownerRefEl = Array.from(el.children || []).find(c => local(c) === 'ownerref');
+                            const creatorRefValue = creatorRefEl ? (attr(creatorRefEl, 'ref', 'Ref', 'REF') || '') : '';
+                            const ownerRefValue = ownerRefEl ? (attr(ownerRefEl, 'ref', 'Ref', 'REF') || '') : '';
+
                             if (!eventsByInstructionId.has(ref)) eventsByInstructionId.set(ref, []);
-                            eventsByInstructionId.get(ref).push({ ...meta, resultsRef: resultsRefValue, rawEl: el });
+                            eventsByInstructionId.get(ref).push({ 
+                                ...meta, 
+                                resultsRef: resultsRefValue, 
+                                creatorRef: creatorRefValue ? resolve(creatorRefValue) : '',
+                                ownerRef: ownerRefValue ? resolve(ownerRefValue) : '',
+                                rawEl: el 
+                            });
                         }
                     }
                 }
@@ -4574,6 +4895,9 @@
 
             let selLinks, selLinkLabels, selNodes, selGroups, selGroupLabels;
 
+            // ============================================================
+            // RENDER
+            // ============================================================
             function render() {
                 const sourceIds = Array.from(new Set(nodes.map(n => n.sourceId).filter(x => x)));
                 selGroups = gGroups.selectAll('rect.group-box').data(sourceIds, d => d);
@@ -4904,6 +5228,9 @@
             }
 
             // ── リンク表示制御ロジック ──────────────────────────
+            // ============================================================
+            // LINK VISIBILITY
+            // ============================================================
             function _applyLinkVisibility() {
                 const showTemplateRef = document.getElementById('lvTemplateRef')?.checked !== false;
                 const showInstanceRef = document.getElementById('lvInstanceRef')?.checked !== false;
@@ -4977,7 +5304,7 @@
                 return `M${source.x},${source.y} A${radius},${radius} 0 0,${sweep} ${target.x},${target.y}`;
             }
 
-            const gridSize = 10;
+            let gridSize = GRID_SIZE;
 
             function enableDrag(enabled) {
                 const nodeDrag = d3.drag()
@@ -5054,6 +5381,9 @@
                 }
             }
 
+            // ============================================================
+            // LAYOUT PERSISTENCE
+            // ============================================================
             function layoutKey() {
                 return 'maiml-layout:' + (netKey || 'default');
             }
@@ -5107,6 +5437,9 @@
                 });
             }
 
+            // ============================================================
+            // DETAIL PANEL
+            // ============================================================
             function showDetails(node) {
                 $meta.innerHTML = '';
                 const basic = document.createElement('table');
@@ -5248,8 +5581,22 @@
                                         : '';
                                     div.innerHTML = `<div style="font-size:12px; font-weight:bold; color:var(--accent);">Event #${eIdx + 1}${resultsLabel}</div>`;
 
-                                    if (evt.properties && evt.properties.length > 0) {
-                                        div.appendChild(renderPropertiesTable(evt.properties));
+                                    if (evt.properties && evt.properties.length > 0 || evt.creatorRef || evt.ownerRef) {
+                                        // creatorRef / ownerRef があればメタデータテーブルとして追加
+                                        if (evt.creatorRef || evt.ownerRef) {
+                                            const mTable = document.createElement('table');
+                                            mTable.className = 'kv';
+                                            mTable.style.marginBottom = '4px';
+                                            let mHtml = '';
+                                            if (evt.creatorRef) mHtml += `<tr><th>creator</th><td>${esc(resolveMetadataName(evt.creatorRef))}</td></tr>`;
+                                            if (evt.ownerRef) mHtml += `<tr><th>owner</th><td>${esc(resolveMetadataName(evt.ownerRef))}</td></tr>`;
+                                            mTable.innerHTML = mHtml;
+                                            div.appendChild(mTable);
+                                        }
+
+                                        if (evt.properties && evt.properties.length > 0) {
+                                            div.appendChild(renderPropertiesTable(evt.properties));
+                                        }
                                     } else {
                                         div.insertAdjacentHTML('beforeend', '<span class="hint">No properties</span>');
                                     }
@@ -5285,7 +5632,10 @@
                 const label = isTemplate ? 'Template' : 'Instance';
                 // isTemplate の判定を外し、item.role があれば常に表示するように変更
                 const roleLabel = item.role ? `(${esc(item.role)})` : '';
-                sum.innerHTML = `<span class="badge" ${badgeStyle}>#${index}</span> [${label}] ${esc(item.originalId || item.id || '')} ${roleLabel}`;
+                const resultsLabel = item.resultsRef
+                    ? `<span style="margin-left:8px; padding:1px 7px; border-radius:10px; background:var(--chip); color:var(--chip-ink); font-size:11px; font-weight:600;">${esc(item.resultsRef)}</span>`
+                    : '';
+                sum.innerHTML = `<span class="badge" ${badgeStyle}>#${index}</span> [${label}] ${esc(item.originalId || item.id || '')} ${roleLabel}${resultsLabel}`;
 
                 // --- AI要約ボタン ---
                 const aiBtn = document.createElement('button');
@@ -5885,12 +6235,20 @@
                     } else if (stored.format === 'text') {
                         // Text形式の修正
                         const text = await stored.fileData.data.text();
-                        container.innerHTML = `<pre style="white-space:pre-wrap; font-size:12px; max-height:400px; overflow:auto;">${text}</pre>`;
+                        // [SECURITY FIX] Use esc() to prevent XSS from malicious text file content
+                        container.innerHTML = `<pre style="white-space:pre-wrap; font-size:12px; max-height:400px; overflow:auto;">${esc(text)}</pre>`;
+                    } else if (stored.format === 'emsa') {
+                        container.innerHTML = '<p>Loading EMSA spectrum...</p>';
+                        await renderEMSA(stored.fileData.data, container);
                     } else {
-                        container.innerHTML = stored.preview;
+                        // [SECURITY FIX] Sanitize stored preview HTML to prevent XSS propagation
+                        container.innerHTML = (typeof DOMPurify !== 'undefined')
+                            ? DOMPurify.sanitize(stored.preview)
+                            : stored.preview;
                     }
                 } catch (err) {
-                    container.innerHTML = `<p style="color:var(--warn);">Failed to display file: ${err.message}</p>`;
+                    // [SECURITY FIX] Use esc() to prevent XSS via error messages
+                    container.innerHTML = `<p style="color:var(--warn);">Failed to display file: ${esc(err.message)}</p>`;
                 }
             }
 
@@ -6304,12 +6662,28 @@
                 return [];
             }
 
+            /**
+             * メタデータのID（creator/owner等）から表示用名前に変換する
+             */
+            function resolveMetadataName(id) {
+                if (!id) return '';
+                if (!window.documentInfoMap) return id;
+
+                for (const infoObj of window.documentInfoMap.values()) {
+                    const found = infoObj.others.find(o => o.id === id);
+                    if (found && found.name) return found.name;
+                }
+                return id; // 見つからなければIDをそのまま返す
+            }
+
             function esc(s) {
                 return (s == null ? '' : (s + '')).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" }[c]));
             }
 
 
-            // ── Decryption utilities ──────────────────────────────────────
+            // ============================================================
+            // DECRYPTION UTILITIES
+            // ============================================================
             let _sessionPassword = null;
             let _encRowCounter = 0;
             const _encRowRegistry = new Map();
@@ -6738,17 +7112,20 @@
     </script>
 
     <script>
-        // Gemini key button with Custom Modal
+        // ============================================================
+        // GEMINI API KEY MODAL
+        // ============================================================
         (function () {
             const themeBtn = document.getElementById("themeBtn");
             if (!themeBtn) return;
 
             // 1. ボタンの作成
-            const gemBtn = document.createElement('button');
-            gemBtn.className = 'btn';
-            gemBtn.id = 'geminiKeyBtn';
-            gemBtn.textContent = '🔑 Gemini API Key';
-            themeBtn.before(gemBtn);
+            // const gemBtn = document.createElement('button');
+            // gemBtn.className = 'btn';
+            // gemBtn.id = 'geminiKeyBtn';
+            // gemBtn.textContent = '🔑 Gemini API Key';
+            // themeBtn.before(gemBtn);
+            const gemBtn = document.getElementById('geminiKeyBtn');
 
             // 2. モーダルHTMLの注入
             const modalHtml = `
@@ -6844,7 +7221,9 @@
     </script>
 
     <script>
-        // summary dialog
+        // ============================================================
+        // AI SUMMARY DIALOG
+        // ============================================================
         (function () {
             const modal = document.getElementById("aiSummaryModal");
             const closeBtn = document.getElementById("aiSummaryClose");
@@ -6910,7 +7289,7 @@
                 runGemini(currentText);
             });
 
-            // ===== Gemini モデル一覧取得 + 前回選択モデル復元 =====
+            // ---- Gemini モデル一覧取得 + 前回選択モデル復元 ----
             const STORAGE_KEY_MODEL = "geminiSelectedModel";
             let modelsFetched = false;
 
@@ -6924,7 +7303,7 @@
                 } else {
                     const opt = document.createElement("option");
                     opt.value = saved;
-                    opt.textContent = saved + "  (前回使用)";
+                    opt.textContent = saved + "  (last used)";
                     sel.insertBefore(opt, sel.firstChild);
                     sel.value = saved;
                 }
@@ -6978,7 +7357,7 @@
 
             const fetchModelsBtn = document.getElementById("fetchModelsBtn");
             if (fetchModelsBtn) fetchModelsBtn.addEventListener("click", () => fetchGeminiModels(true));
-            // ===== ここまで =====
+            // ---- ここまで ----
 
             window.openAISummaryDialog = function (text) {
                 currentText = text;
@@ -7027,15 +7406,7 @@
                     return;
                 }
 
-                const blob = new Blob([textToSave], { type: "text/markdown" });
-                const url = URL.createObjectURL(blob);
-
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = "AIsummary.md";
-                a.click();
-
-                URL.revokeObjectURL(url);
+                downloadFile(textToSave, "AIsummary.md", "text/markdown");
             });
 
             function getPrompt(text, lang) {
@@ -7165,7 +7536,11 @@
                         rawTextContent = data.candidates[0].content.parts[0].text.trim();
 
                         if (typeof marked !== 'undefined') {
-                            resultDiv.innerHTML = marked.parse(rawTextContent);
+                            // [SECURITY FIX] Sanitize marked.parse() output with DOMPurify to prevent XSS
+                            const rawHtml = marked.parse(rawTextContent);
+                            resultDiv.innerHTML = (typeof DOMPurify !== 'undefined')
+                                ? DOMPurify.sanitize(rawHtml)
+                                : rawHtml;
                             resultDiv.classList.add("markdown-content");
 
                             // 注意書きを追加
@@ -7192,9 +7567,9 @@
     </script>
 
     <script>
-        // =============================================================================
-        // MaiMLViewer メタデータExport機能追加コード
-        // =============================================================================
+        // ============================================================
+        // METADATA EXPORT
+        // ============================================================
 
         // デバッグ用：変数が公開されているか確認
 
@@ -8016,7 +8391,7 @@
                 }
 
                 // ファイル名生成
-                const fileName = `MaiML_Metadata_${new Date().toISOString().slice(0, 10)}.xlsx`;
+                const fileName = `MaiML_Metadata_${todayString()}.xlsx`;
 
 
                 // ダウンロード
@@ -8065,40 +8440,38 @@
             };
 
             const jsonStr = JSON.stringify(output, null, 2);
-            const blob = new Blob([jsonStr], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
+            downloadFile(jsonStr, `MaiML_Metadata_${todayString()}.json`, 'application/json');
+        }
 
-            const fileName = `MaiML_Metadata_${new Date().toISOString().slice(0, 10)}.json`;
+        // ============================================================
+        // CSV HELPERS  (module-level so they can be reused)
+        // ============================================================
 
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = fileName;
-            a.click();
+        /** UTF-8 BOM (Excel互換) */
+        const CSV_BOM = '\uFEFF';
 
-            URL.revokeObjectURL(url);
+        /**
+         * CSV セル値をエスケープする。
+         * ダブルクォート・カンマ・改行を含む場合はクォートで囲む。
+         */
+        function escapeCSV(value) {
+            if (value == null) return '';
+            const str = String(value);
+            if (str.includes('"') || str.includes(',') || str.includes('\n') || str.includes('\r')) {
+                return '"' + str.replace(/"/g, '""') + '"';
+            }
+            return str;
+        }
+
+        /** 配列を1行分の CSV 文字列に変換する。 */
+        function arrayToCSVRow(arr) {
+            return arr.map(escapeCSV).join(',') + '\n';
         }
 
         // CSV出力関数
         function exportToCSV(metadata) {
 
-            const CSV_BOM = '\uFEFF'; // UTF-8 BOM for Excel compatibility
             let csvContent = CSV_BOM;
-
-            // Helper function: CSVセルのエスケープ
-            function escapeCSV(value) {
-                if (value == null) return '';
-                const str = String(value);
-                // ダブルクォート、カンマ、改行を含む場合はクォートで囲む
-                if (str.includes('"') || str.includes(',') || str.includes('\n') || str.includes('\r')) {
-                    return '"' + str.replace(/"/g, '""') + '"';
-                }
-                return str;
-            }
-
-            // Helper function: 配列をCSV行に変換
-            function arrayToCSVRow(arr) {
-                return arr.map(escapeCSV).join(',') + '\n';
-            }
 
             // 1. Document Info
             csvContent += '\n=== Document Info ===\n';
@@ -8289,16 +8662,7 @@
             }
 
             // ダウンロード
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const fileName = `MaiML_Metadata_${new Date().toISOString().slice(0, 10)}.csv`;
-
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = fileName;
-            a.click();
-
-            URL.revokeObjectURL(url);
+            downloadFile(csvContent, `MaiML_Metadata_${todayString()}.csv`, 'text/csv;charset=utf-8;');
         }
 
         // 8. 階層構造の復元
@@ -8386,6 +8750,7 @@
         }
 
         // ============================================================
+        // COLUMN RESIZE
         // カラムリサイズ機能
         //   ・初期表示はwidth:100%でウインドウ幅にフィット
         //   ・初回ドラッグ時にtable-layout:fixedへ切替（他列が動かなくなる）
@@ -8560,7 +8925,7 @@
                 });
             });
 
-            // ---- 列並べ替え（ドラッグ＆ドロップ） ----
+            // ---- 列並べ替え (ドラッグ＆ドロップ) ----
             restoreColOrder(tbl);
 
             let dragSrcIdx = null;
@@ -8620,9 +8985,9 @@
         }
 
 
-        // ==========================================
-        // Help Manual Feature (Fixed Version)
-        // ==========================================
+        // ============================================================
+        // HELP MANUAL
+        // ============================================================
         document.addEventListener('DOMContentLoaded', function () {
 
             // 1. ヘルプボタンをツールバーに追加
@@ -8688,9 +9053,9 @@
             };
         });
 
-        // ==========================================
-        // Toolbar Button Reordering (UX Improvement: Fixed Version)
-        // ==========================================
+        // ============================================================
+        // TOOLBAR BUTTON REORDERING
+        // ============================================================
         document.addEventListener('DOMContentLoaded', function () {
             setTimeout(() => {
                 const toolbar = document.getElementById('toolbar');
@@ -8698,7 +9063,7 @@
 
                 // 各ボタンをIDで確実に取得
                 const btnExport = document.getElementById('exportMetadataBtn'); // Export
-                const btnKey = document.getElementById('geminiKeyBtn');         // Gemini API
+                // const btnKey = document.getElementById('geminiKeyBtn');         // Gemini API
                 const btnTheme = document.getElementById('themeBtn');           // Theme
                 const btnHelp = document.getElementById('manualHelpBtn');       // Help
 
@@ -8706,7 +9071,7 @@
                 // 理想の並び: [Spacer] -> [Export] -> [API Key] -> [Theme] -> [Help]
 
                 if (btnExport) toolbar.appendChild(btnExport);
-                if (btnKey) toolbar.appendChild(btnKey);
+                // if (btnKey) toolbar.appendChild(btnKey);
                 if (btnTheme) toolbar.appendChild(btnTheme);
                 if (btnHelp) toolbar.appendChild(btnHelp);
 
