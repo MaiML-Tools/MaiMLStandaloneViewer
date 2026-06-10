@@ -537,6 +537,20 @@ header#toolbar {
             stroke-width: 2
         }
 
+        /* placeType ごとのストロークカラー */
+        .nodes .place.place-material  circle { stroke: #3b82f6; }
+        .nodes .place.place-condition circle { stroke: #f59e0b; }
+        .nodes .place.place-result    circle { stroke: #10b981; }
+
+        /* バッジテキストの色（circle と同色） */
+        .nodes .place.place-material  .place-type-badge { fill: #3b82f6; }
+        .nodes .place.place-condition .place-type-badge { fill: #f59e0b; }
+        .nodes .place.place-result    .place-type-badge { fill: #10b981; }
+
+        /* selected 時：circle/rect は赤、バッジ文字は元の色を維持 */
+        .node.selected circle,
+        .node.selected rect { stroke: var(--warn) !important; }
+
         .nodes .transition rect {
             fill: var(--surface);
             stroke: var(--accent);
@@ -5722,6 +5736,14 @@ header .chk input[type="checkbox"] {
             // RENDER
             // ============================================================
             function render() {
+                // placeToTemplates が確定した後に placeType を後付けで設定する。
+                nodes.forEach(n => {
+                    if (n.type !== 'place') return;
+                    if (n.placeType) return;
+                    const tpls = placeToTemplates.get(n.id) || [];
+                    n.placeType = tpls.length > 0 ? (tpls[0].role || 'unknown') : 'unknown';
+                });
+
                 const sourceIds = Array.from(new Set(nodes.map(n => n.sourceId).filter(x => x)));
                 selGroups = gGroups.selectAll('rect.group-box').data(sourceIds, d => d);
                 selGroups.exit().remove();
@@ -5820,7 +5842,26 @@ header .chk input[type="checkbox"] {
                     const s = d3.select(this);
                     if (d.type === 'place') {
                         const r = d.r || 16;
+                        const badgeLabelMap = { material: 'M', condition: 'C', result: 'R' };
+                        const badgeLabel = badgeLabelMap[d.placeType] || '';
+
+                        // placeType をクラスとして付与（色はCSSで制御）
+                        s.classed(`place-${d.placeType || 'unknown'}`, true);
+
                         s.append('circle').attr('r', r);
+
+                        // 〇の中央に M / C / R バッジテキスト
+                        if (badgeLabel) {
+                            s.append('text')
+                                .attr('class', 'place-type-badge')
+                                .attr('dy', '0.35em')
+                                .attr('text-anchor', 'middle')
+                                .style('font-size', `${Math.max(Math.floor(r * 0.75), 10)}px`)
+                                .style('font-weight', '700')
+                                .style('pointer-events', 'none')
+                                .text(badgeLabel);
+                        }
+
                         s.append('text').attr('class', 'label').attr('dy', r + 12).attr('text-anchor', 'middle').text(d.label || d.id);
                     } else {
                         d.w = d.w || 24;
@@ -7915,10 +7956,10 @@ header .chk input[type="checkbox"] {
             ;
             (function demo() {
                 nodes = [
-                    { id: 'place_Material', type: 'place', label: 'MaterialPlace', r: 18 },
-                    { id: 'place_Condition', type: 'place', label: 'ConditionPlace', r: 18 },
+                    { id: 'place_Material', type: 'place', label: 'MaterialPlace', r: 18, placeType: 'material' },
+                    { id: 'place_Condition', type: 'place', label: 'ConditionPlace', r: 18, placeType: 'condition' },
                     { id: 'transition1', type: 'transition', label: 'measurementTransition', w: 24, h: 50 },
-                    { id: 'place_Result', type: 'place', label: 'ResultPlace', r: 18 }
+                    { id: 'place_Result', type: 'place', label: 'ResultPlace', r: 18, placeType: 'result' }
                 ];
                 links = [
                     { source: 'place_Material', target: 'transition1' },
