@@ -1502,6 +1502,77 @@ header#toolbar {
             background: rgba(255, 255, 255, 0.35);
         }
 
+        /* --- ヘッダー上のアクションボタン (Sync / Change Folder) ---
+           グラデーション背景に .btn.primary の単色塗りを重ねると同化して視認性が落ちるため、
+           閉じるボタンと同系のガラス調スタイルにする。Sync(主要操作)はより明るく、
+           Change Folder(頻度の低い操作)はより控えめにして優先度の違いを表現する。 */
+        #datalakePanel .dl-hdr-btn {
+            border-radius: 6px;
+            padding: 0.35rem 0.6rem;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s, transform 0.1s;
+            white-space: nowrap;
+        }
+
+        #datalakePanel .dl-hdr-btn-primary {
+            background: rgba(255, 255, 255, 0.22);
+            border: 1px solid rgba(255, 255, 255, 0.45);
+            color: #fff;
+        }
+
+        #datalakePanel .dl-hdr-btn-primary:hover {
+            background: rgba(255, 255, 255, 0.34);
+        }
+
+        #datalakePanel .dl-hdr-btn-secondary {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            color: rgba(255, 255, 255, 0.92);
+        }
+
+        #datalakePanel .dl-hdr-btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.16);
+        }
+
+        /* --- キャッシュバナー: オフラインキャッシュ表示中であることを1箇所にまとめて案内する
+           (以前はファイルカード1件ごとに赤字表示していたが、ノイズが多かったため統合) --- */
+        #datalakePanel .dl-cache-banner {
+            display: none;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.4rem 0.8rem;
+            font-size: 11px;
+            background: rgba(245, 158, 11, 0.12);
+            border-bottom: 1px solid rgba(245, 158, 11, 0.35);
+            color: #b45309;
+            flex-shrink: 0;
+        }
+
+        :root[data-theme="dark"] #datalakePanel .dl-cache-banner {
+            color: #fbbf24;
+        }
+
+        /* --- 検索語ハイライト --- */
+        mark.dl-hl {
+            background: var(--chip);
+            color: var(--chip-ink);
+            font-weight: 700;
+            padding: 0 1px;
+            border-radius: 2px;
+        }
+
+        /* --- マッチ理由チップ: ファイル名等の見える項目ではなく、隠れた項目
+           (uuid / property key / description 等) でヒットしたことを示す --- */
+        .dl-badge.match-reason {
+            background: transparent;
+            border: 1px dashed var(--border);
+            color: var(--muted);
+            font-family: 'Courier New', monospace;
+            font-weight: 500;
+        }
+
         /* --- プログレスバー --- */
         #datalakePanel .dl-progress-wrap {
             flex-shrink: 0;
@@ -1589,6 +1660,39 @@ header#toolbar {
             margin-bottom: 0.1rem;
         }
 
+        #datalakePanel .dl-filter-label-row {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 0.4rem;
+        }
+
+        #datalakePanel .dl-filter-select-all {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            font-size: 10px;
+            font-weight: 500;
+            color: var(--muted);
+            text-transform: none;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        #datalakePanel .dl-filter-select-all input {
+            accent-color: var(--accent);
+            cursor: pointer;
+        }
+
+        /* Instrument/Creator/Vendor/Owner の4フィルターを2列グリッドで並べる。
+           680px幅のパネルなら2列でも1列あたり十分な幅が確保できるため。
+           狭く感じる場合は #dlMetaFilterGrid を折りたたみ式に変更する想定。 */
+        #datalakePanel .dl-meta-filter-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem 0.7rem;
+        }
+
         #datalakePanel .dl-instrument-list {
             max-height: 100px;
             overflow-y: auto;
@@ -1610,23 +1714,13 @@ header#toolbar {
             color: var(--ink);
         }
 
-        #datalakePanel .dl-search-btn {
-            display: flex;
-            justify-content: flex-end;
-            gap: 0.4rem;
-        }
 
         /* --- 結果リスト --- */
+        /* このdivは今は何も表示しない(件数表示はフッターの「N selected」と統合済み)。
+           Sort/Select All行(controlHeaderCard)のshow/hideタイミングと挿入先の目印として
+           だけ使うので、余白・枠線を持たせず高さ0の目印として残す。 */
         #datalakePanel .dl-results-header {
             flex-shrink: 0;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0.45rem 0.8rem;
-            font-size: 12px;
-            color: var(--muted);
-            border-bottom: 1px solid var(--border);
-            background: var(--table-head);
         }
 
         #datalakePanel .dl-results-list {
@@ -1717,6 +1811,18 @@ header#toolbar {
             color: var(--chip-ink);
         }
 
+        .dl-badge.vendor {
+            background: var(--table-head);
+            color: var(--accent2);
+            border: 1px solid var(--border);
+        }
+
+        .dl-badge.owner {
+            background: var(--table-head);
+            color: var(--accent);
+            border: 1px solid var(--border);
+        }
+
         /* --- フッター（複数選択ロードボタン） --- */
         #datalakePanel .dl-footer {
             flex-shrink: 0;
@@ -1732,6 +1838,18 @@ header#toolbar {
         #datalakePanel .dl-footer .dl-selected-count {
             font-size: 12px;
             color: var(--muted);
+        }
+
+        #datalakePanel .dl-footer-counts {
+            font-size: 12px;
+            color: var(--muted);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        #datalakePanel .dl-footer-sep {
+            color: var(--border);
         }
 
         /* --- 空状態 --- */
@@ -1799,7 +1917,7 @@ header .chk input[type="checkbox"] {
             <!-- Keyword -->
             <div>
                 <div class="dl-filter-label">Keyword Search</div>
-                <input type="text" id="dlKeywordInput" placeholder="Filename, Sample, Operator..." autocomplete="off">
+                <input type="text" id="dlKeywordInput" placeholder="Filename, Sample, Creator, Vendor, Owner..." autocomplete="off">
             </div>
             <!-- Date Range -->
             <div>
@@ -1811,26 +1929,51 @@ header .chk input[type="checkbox"] {
                     <input type="date" id="dlDateTo">
                 </div>
             </div>
-            <!-- Instrument Filter -->
-            <div id="dlInstrumentFilterWrap" style="display:none;">
-                <div class="dl-filter-label">Instrument Filter</div>
-                <div class="dl-instrument-list" id="dlInstrumentList"></div>
-            </div>
-            <!-- Search Buttons -->
-            <div class="dl-search-btn">
-                <button class="btn" id="dlClearBtn">Clear</button>
-                <button class="btn primary" id="dlSearchBtn">🔍 Search</button>
+            <!-- Metadata Filters: Instrument / Creator / Vendor / Owner (the four
+                 <document> child elements MaiML actually defines for this purpose) -->
+            <div id="dlMetaFilterWrap" style="display:none;">
+                <div class="dl-meta-filter-grid">
+                    <div id="dlInstrumentFilterWrap" style="display:none;">
+                        <div class="dl-filter-label-row">
+                            <div class="dl-filter-label">Instrument</div>
+                            <label class="dl-filter-select-all"><input type="checkbox" checked id="dlInstrumentSelectAll"> Select All</label>
+                        </div>
+                        <div class="dl-instrument-list" id="dlInstrumentList"></div>
+                    </div>
+                    <div id="dlCreatorFilterWrap" style="display:none;">
+                        <div class="dl-filter-label-row">
+                            <div class="dl-filter-label">Creator</div>
+                            <label class="dl-filter-select-all"><input type="checkbox" checked id="dlCreatorSelectAll"> Select All</label>
+                        </div>
+                        <div class="dl-instrument-list" id="dlCreatorList"></div>
+                    </div>
+                    <div id="dlVendorFilterWrap" style="display:none;">
+                        <div class="dl-filter-label-row">
+                            <div class="dl-filter-label">Vendor</div>
+                            <label class="dl-filter-select-all"><input type="checkbox" checked id="dlVendorSelectAll"> Select All</label>
+                        </div>
+                        <div class="dl-instrument-list" id="dlVendorList"></div>
+                    </div>
+                    <div id="dlOwnerFilterWrap" style="display:none;">
+                        <div class="dl-filter-label-row">
+                            <div class="dl-filter-label">Owner</div>
+                            <label class="dl-filter-select-all"><input type="checkbox" checked id="dlOwnerSelectAll"> Select All</label>
+                        </div>
+                        <div class="dl-instrument-list" id="dlOwnerList"></div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Results Header -->
-        <div class="dl-results-header" id="dlResultsHeader" style="display:none;">
-            <span id="dlResultCount">0 items</span>
-            <label style="display:flex;align-items:center;gap:4px;cursor:pointer;">
-                <input type="checkbox" id="dlSelectAllChk" style="accent-color:var(--accent);">
-                <span style="font-size:11px;">Select All</span>
-            </label>
-        </div>
+        <!-- Results Header: no longer shows visible content (the "N / M items" count
+             moved down into the footer, next to "N selected" — showing both counts
+             on separate lines was redundant). Kept as a zero-footprint anchor: its
+             show/hide timing still gates the Sort/Select-All row below it, and
+             controlHeaderCard is inserted right after it. -->
+        <div class="dl-results-header" id="dlResultsHeader" style="display:none;"></div>
+
+        <!-- Cache banner (shown only when displaying an offline/cached index) -->
+        <div class="dl-cache-banner" id="dlCacheBanner"></div>
 
         <!-- File List -->
         <div class="dl-results-list" id="dlResultsList">
@@ -1842,7 +1985,9 @@ header .chk input[type="checkbox"] {
 
         <!-- Footer -->
         <div class="dl-footer" id="dlFooter" style="display:none;">
-            <span class="dl-selected-count" id="dlSelectedCount">0 selected</span>
+            <span class="dl-footer-counts">
+                <span id="dlResultCount">0 items</span><span class="dl-footer-sep">·</span><span class="dl-selected-count" id="dlSelectedCount">0 selected</span>
+            </span>
             <button class="btn primary" id="dlLoadSelectedBtn" disabled>📂 Open Selected</button>
         </div>
     </div>
@@ -2494,17 +2639,22 @@ header .chk input[type="checkbox"] {
 
                         <h3 style="font-size: 1.1rem; color: var(--accent); margin: 1.2rem 0 0.5rem;">概要</h3>
                         <p style="margin-bottom: 0.8rem;">W3C XML Signature 準拠（ECDSA P-256）で署名された MaiML
-                            ファイルを読み込んだ際、改ざんが行われていないか自動的に検証します。</p>
+                            ファイルを読み込んだ際、ファイルが署名後に改変されていないか（整合性）を自動的に検証します。</p>
+                        <p style="margin-bottom: 0.8rem; background:#fffbeb; color:#78350f; border:1px solid #f59e0b; border-radius:6px; padding:0.6rem 0.8rem; font-size:0.9rem;">
+                            ⚠️ <strong>この検証が示す範囲について:</strong> 検証に用いる公開鍵は署名対象の MaiML
+                            ファイル内に同梱されています。したがってこの機能は「ファイルとその署名・ハッシュが内部的に整合しているか（＝破損や素朴な改変がないか）」を確認する<strong>整合性チェック</strong>であり、
+                            「誰が署名したか」という<strong>署名者の真正性は証明しません</strong>（信頼の起点となる証明書／PKI を持たないため、
+                            第三者が内容を書き換えたうえで自分の鍵で署名し直すことは可能です）。真正性の担保が必要な用途では、公開鍵を別経路で入手・検証する運用と組み合わせてください。</p>
 
                         <h3 style="font-size: 1.1rem; color: var(--accent); margin: 1.2rem 0 0.5rem;">✅ 検証と結果表示</h3>
                         <p>検証結果は右上パネル（<strong>Document Metadata</strong>）の表の最上部に自動表示されます。</p>
                         <ul style="padding-left: 1.5rem; margin-bottom: 0.8rem;">
                             <li><span
                                     style="background: #ecfdf5; border: 1px solid #10b981; color: #047857; border-radius: 4px; padding: 1px 5px; font-size: 12px;">✅
-                                    Valid</span> — 署名が有効かつ、データが改ざんされていません。</li>
+                                    Integrity OK</span> — 署名とハッシュがファイル内容と整合しています（署名後に改変されていない）。※上記の注記のとおり、署名者の真正性までは保証しません。</li>
                             <li><span
                                     style="background: #fef2f2; border: 1px solid #ef4444; color: #b91c1c; border-radius: 4px; padding: 1px 5px; font-size: 12px;">❌
-                                    Invalid</span> — ハッシュの不一致、または署名値の不一致が検出されました。ファイルの内容が改変されている可能性があります。</li>
+                                    Integrity check failed</span> — ハッシュの不一致、または署名値の不一致が検出されました。ファイルの内容が改変されている可能性があります。</li>
                             <li><span
                                     style="background: #fef3c7; border: 1px solid #f59e0b; color: #b45309; border-radius: 4px; padding: 1px 5px; font-size: 12px;">⚠️
                                     Unsupported</span> — RSA 暗号など、現在のビューアが未対応のアルゴリズムの署名です（現状は ECDSA P-256 のみに対応）。</li>
@@ -2886,8 +3036,18 @@ header .chk input[type="checkbox"] {
                             🔏 8. XML Signature Verification (ds:Signature)</h2>
 
                         <h3 style="font-size: 1.1rem; color: var(--accent); margin: 1.2rem 0 0.5rem;">Overview</h3>
-                        <p style="margin-bottom: 0.8rem;">Automatically verifies W3C XML Signature compliant (ECDSA
-                            P-256) signatures when a signed MaiML file is loaded to detect any tampering.</p>
+                        <p style="margin-bottom: 0.8rem;">When a signed MaiML file (W3C XML Signature, ECDSA
+                            P-256) is loaded, it automatically checks whether the file has been altered since it was
+                            signed (integrity).</p>
+                        <p style="margin-bottom: 0.8rem; background:#fffbeb; color:#78350f; border:1px solid #f59e0b; border-radius:6px; padding:0.6rem 0.8rem; font-size:0.9rem;">
+                            ⚠️ <strong>What this check does and does not prove:</strong> the public key used for
+                            verification is embedded inside the MaiML file itself. This is therefore an
+                            <strong>integrity self-check</strong> — it confirms the file is internally consistent with
+                            its own signature and hash (i.e. not corrupted or naively altered) — but it
+                            <strong>does not prove signer authenticity</strong> (there is no certificate / PKI trust
+                            anchor, so a third party can rewrite the content and re-sign it with their own key). For
+                            use cases that require authenticity, combine this with an out-of-band way to obtain and
+                            trust the signer's public key.</p>
 
                         <h3 style="font-size: 1.1rem; color: var(--accent); margin: 1.2rem 0 0.5rem;">✅ Verification and
                             Display</h3>
@@ -2896,10 +3056,12 @@ header .chk input[type="checkbox"] {
                         <ul style="padding-left: 1.5rem; margin-bottom: 0.8rem;">
                             <li><span
                                     style="background: #ecfdf5; border: 1px solid #10b981; color: #047857; border-radius: 4px; padding: 1px 5px; font-size: 12px;">✅
-                                    Valid</span> — The signature is valid and the data has not been tampered with.</li>
+                                    Integrity OK</span> — The signature and hash are consistent with the file content (not
+                                altered since signing). Note: as explained above, this does not guarantee signer
+                                authenticity.</li>
                             <li><span
                                     style="background: #fef2f2; border: 1px solid #ef4444; color: #b91c1c; border-radius: 4px; padding: 1px 5px; font-size: 12px;">❌
-                                    Invalid</span> — Hash mismatch or signature value mismatch detected. The file
+                                    Integrity check failed</span> — Hash mismatch or signature value mismatch detected. The file
                                 content may have been altered.</li>
                             <li><span
                                     style="background: #fef3c7; border: 1px solid #f59e0b; color: #b45309; border-radius: 4px; padding: 1px 5px; font-size: 12px;">⚠️
@@ -2925,19 +3087,47 @@ header .chk input[type="checkbox"] {
     </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
-    <script src="https://cdn.jsdelivr.net/npm/dagre@0.8.5/dist/dagre.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
-    <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/papaparse@5"></script>
-    <script src="https://cdn.jsdelivr.net/npm/utif@3.1.0/UTIF.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
-    <!-- [SECURITY] DOMPurify: XSS sanitizer for marked.parse() output -->
-    <!-- SRI hash: generate at https://www.srihash.org/ and add integrity="sha384-..." crossorigin="anonymous" -->
-    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.0/dist/purify.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <!-- All third-party scripts are version-pinned and carry an SRI hash so a
+         compromised/altered CDN response fails closed (the browser refuses to
+         run a script whose bytes don't match the integrity hash). -->
+    <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0"
+        integrity="sha384-CjloA8y00+1SDAUkjs099PVfnY2KmDC2BZnws9kh8D/lX1s46w6EPhpXdqMfjK6i"
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dagre@0.8.5/dist/dagre.min.js"
+        integrity="sha384-2IH3T69EIKYC4c+RXZifZRvaH5SRUdacJW7j6HtE5rQbvLhKKdawxq6vpIzJ7j9M"
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1"
+        integrity="sha384-jb8JQMbMoBUzgWatfe6COACi2ljcDdZQ2OxczGA3bGNeWe+6DChMTBJemed7ZnvJ"
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"
+        integrity="sha384-Cs3dgUx6+jDxxuqHvVH8Onpyj2LF1gKZurLDlhqzuJmUqVYMJ0THTWpxK5Z086Zm"
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"
+        integrity="sha384-zPzbVRXfR492Sd5D+HydTYCxxgHAfgVO8KERbLlpeH5unsmbAEXrscGUUqLZG9BM"
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.5.4"
+        integrity="sha384-cLjG6lwXwNDhUhTjXK3ohZ0rY1kC099EjtQic90lF92kT8M0+eD45d1inP5youpY"
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdn.jsdelivr.net/npm/utif@3.1.0/UTIF.js"
+        integrity="sha384-RyBmXHdfZ/Uon+ud+/AqSyWpUWnKYt2tkRG/P4gWoRUGDU+qIAV3tGBPNlYTBZEF"
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"
+        integrity="sha384-vtjasyidUo0kW94K5MXDXntzOJpQgBKXmE7e2Ga4LG0skTTLeBi97eFAXsqewJjw"
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"
+        integrity="sha384-zbcZAIxlvJtNE3Dp5nxLXdXtXyxwOdnILY1TDPVmKFhl4r4nSUG1r8bcFXGVa4Te"
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <!-- [SECURITY] DOMPurify: XSS sanitizer for marked.parse() output — SRI-pinned
+         so a tampered copy cannot silently weaken sanitization. -->
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.0/dist/purify.min.js"
+        integrity="sha384-0Olea29UkyQZfNulDPUf5MshXT3rXNrDqk+TXn1sY6UoVDiqIfEERRKn8oMgO9eF"
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"
+        integrity="sha384-+mbV2IY1Zk/X1p/nWllGySJSUN8uMs+gUAN10Or95UBH0fpj6GfKgPmgC5EXieXG"
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"
+        integrity="sha384-3zSEDfvllQohrq0PHL1fOXJuC/jSOO34H46t6UQfobFOmxE5BpjjaIJY5F2/bMnU"
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script>
         ; (function () {
 
@@ -4069,9 +4259,9 @@ header .chk input[type="checkbox"] {
                     );
 
                     if (isValid) {
-                        _updateSigBadge(key, baseHtml, 'ok', '✅ Signature valid (ECDSA P-256)');
+                        _updateSigBadge(key, baseHtml, 'ok', '✅ Integrity OK — unaltered since signing (ECDSA P-256). Signer authenticity not verified.');
                     } else {
-                        _updateSigBadge(key, baseHtml, 'fail', '❌ Signature invalid');
+                        _updateSigBadge(key, baseHtml, 'fail', '❌ Integrity check failed — file altered since signing');
                     }
                 } catch (e) {
                     console.error('Signature verification error:', e);
@@ -6484,6 +6674,154 @@ header .chk input[type="checkbox"] {
                 }
             }
 
+            // ============================================================
+            // UUID QR CODE MODAL (Place詳細パネルの Template / Instance 用)
+            // ============================================================
+            function showUuidQrModal(uuid, caption) {
+                const existing = document.getElementById('_uuidQrModal');
+                if (existing) existing.remove();
+
+                const modal = document.createElement('div');
+                modal.id = '_uuidQrModal';
+                modal.style.cssText = 'position:fixed; inset:0; z-index:9999; display:flex; align-items:center; justify-content:center;';
+                modal.innerHTML = `
+                    <div class="_uuidQrOverlay" style="position:absolute; inset:0; background:rgba(15,23,42,0.6);"></div>
+                    <div style="position:relative; z-index:1; background:var(--surface); color:var(--ink); border:1px solid var(--border); border-radius:12px; box-shadow:0 20px 60px rgba(0,0,0,0.35); padding:1.25rem; width:280px; display:flex; flex-direction:column; align-items:center;">
+                        <h3 style="margin:0 0 0.2rem; font-size:0.9rem; font-weight:700;">UUID QR Code</h3>
+                        ${caption ? `<p style="margin:0 0 0.75rem; font-size:0.75rem; color:var(--muted); text-align:center;">${esc(caption)}</p>` : ''}
+                        <div id="_uuidQrCanvas" style="background:#fff; border-radius:8px; width:180px; height:180px; display:flex; align-items:center; justify-content:center;"></div>
+                        <div style="margin-top:0.75rem; width:100%; text-align:center; font-family:'Consolas','Courier New',monospace; font-size:0.7rem; color:var(--code-ink); word-break:break-all; background:var(--code-bg); border-radius:6px; padding:0.35rem 0.5rem; user-select:all;">${esc(uuid)}</div>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; width:100%; margin-top:0.9rem;">
+                            <button type="button" id="_uuidQrCopyBtn" class="btn" style="font-size:0.75rem;">Copy UUID</button>
+                            <button type="button" id="_uuidQrPngBtn" class="btn" style="font-size:0.75rem;">Download PNG</button>
+                            <button type="button" id="_uuidQrPrintBtn" class="btn" style="font-size:0.75rem;">Print</button>
+                            <button type="button" id="_uuidQrCloseBtn" class="btn" style="font-size:0.75rem; background:var(--accent); color:#fff; border-color:var(--accent);">Close</button>
+                        </div>
+                    </div>`;
+                document.body.appendChild(modal);
+
+                const close = () => modal.remove();
+                modal.querySelector('._uuidQrOverlay').addEventListener('click', close);
+                document.getElementById('_uuidQrCloseBtn').addEventListener('click', close);
+
+                const qrWrap = document.getElementById('_uuidQrCanvas');
+                try {
+                    new QRCode(qrWrap, {
+                        text: uuid,
+                        width: 160,
+                        height: 160,
+                        colorDark: '#000000',
+                        colorLight: '#ffffff',
+                        correctLevel: QRCode.CorrectLevel.Q
+                    });
+                } catch (e) {
+                    qrWrap.innerHTML = `<span style="color:#dc2626; font-size:0.7rem; padding:0.5rem; text-align:center;">QR generation failed: ${esc(e.message)}</span>`;
+                    return;
+                }
+
+                document.getElementById('_uuidQrCopyBtn').addEventListener('click', () => copyUuidToClipboard(uuid));
+                document.getElementById('_uuidQrPngBtn').addEventListener('click', () => downloadUuidQrPng(qrWrap, uuid, caption));
+                document.getElementById('_uuidQrPrintBtn').addEventListener('click', async () => {
+                    try {
+                        const dataUrl = await buildQrPngDataUrl(qrWrap, uuid, caption);
+                        printQrWindow(dataUrl, uuid, caption);
+                    } catch (e) {
+                        console.error('Print image generation failed:', e);
+                    }
+                });
+            }
+
+            async function copyUuidToClipboard(uuid) {
+                const btn = document.getElementById('_uuidQrCopyBtn');
+                try {
+                    await navigator.clipboard.writeText(uuid);
+                    if (btn) {
+                        const orig = btn.textContent;
+                        btn.textContent = 'Copied!';
+                        setTimeout(() => { btn.textContent = orig; }, 1200);
+                    }
+                } catch (e) {
+                    console.error('Clipboard write failed:', e);
+                    if (btn) btn.textContent = 'Copy failed';
+                }
+            }
+
+            function buildQrPngDataUrl(qrElement, uuid, caption) {
+                return new Promise((resolve, reject) => {
+                    const canvas = qrElement.querySelector('canvas');
+                    let qrSrc = '';
+                    if (canvas) {
+                        qrSrc = canvas.toDataURL('image/png');
+                    } else {
+                        const img = qrElement.querySelector('img');
+                        if (!img) { reject(new Error('QR image not found')); return; }
+                        qrSrc = img.src;
+                    }
+                    const qrImg = new Image();
+                    qrImg.onload = () => {
+                        const QR = 160, PAD = 16;
+                        const W = QR + PAD * 2;
+                        const H = QR + PAD * 2 + 18 + (caption ? 16 : 0);
+                        const c = document.createElement('canvas');
+                        c.width = W;
+                        c.height = H;
+                        const ctx = c.getContext('2d');
+                        ctx.fillStyle = '#ffffff';
+                        ctx.fillRect(0, 0, W, H);
+                        ctx.drawImage(qrImg, PAD, PAD, QR, QR);
+                        ctx.textAlign = 'center';
+                        let ty = PAD + QR + 12;
+                        ctx.font = '9px "Courier New", monospace';
+                        ctx.fillStyle = '#333333';
+                        ctx.fillText(uuid, W / 2, ty);
+                        if (caption) {
+                            ty += 14;
+                            ctx.font = '9px sans-serif';
+                            ctx.fillStyle = '#666666';
+                            ctx.fillText(caption, W / 2, ty);
+                        }
+                        resolve(c.toDataURL('image/png'));
+                    };
+                    qrImg.onerror = () => reject(new Error('QR image load failed'));
+                    qrImg.src = qrSrc;
+                });
+            }
+
+            async function downloadUuidQrPng(qrElement, uuid, caption) {
+                try {
+                    const dataUrl = await buildQrPngDataUrl(qrElement, uuid, caption);
+                    const a = document.createElement('a');
+                    a.href = dataUrl;
+                    a.download = `QR_${uuid}.png`;
+                    a.click();
+                } catch (e) {
+                    console.error('PNG download failed:', e);
+                }
+            }
+
+            function printQrWindow(pngDataUrl, uuid, caption) {
+                const w = window.open('', '_blank', 'width=400,height=500');
+                if (!w) {
+                    console.error('Popup blocked for QR print window');
+                    return;
+                }
+                w.document.write(`<!DOCTYPE html><html><head><title>QR - ${esc(uuid)}</title>
+                    <style>
+                        body { font-family: sans-serif; text-align: center; padding: 20px; }
+                        img { width: 180px; height: 180px; }
+                        .caption { font-size: 12px; color: #444; margin-top: 8px; }
+                        .uuid { font-family: 'Consolas', 'Courier New', monospace; font-size: 11px; word-break: break-all; margin-top: 4px; }
+                    </style>
+                    </head><body>
+                        <img src="${pngDataUrl}" />
+                        ${caption ? `<div class="caption">${esc(caption)}</div>` : ''}
+                        <div class="uuid">${esc(uuid)}</div>
+                    </body></html>`);
+                w.document.close();
+                w.focus();
+                setTimeout(() => { try { w.print(); } catch (e) {} }, 300);
+            }
+
             /**
              * Template と Instance の詳細表示を共通で行う関数（修正版）
              */
@@ -6562,7 +6900,7 @@ header .chk input[type="checkbox"] {
 
                 let infoHtml = '';
 
-                if (item.uuid) infoHtml += `<tr><th style="width:1%; white-space:nowrap;">UUID</th><td>${esc(item.uuid)}</td></tr>`;
+                if (item.uuid) infoHtml += `<tr><th style="width:1%; white-space:nowrap;">UUID</th><td>${esc(item.uuid)} <button type="button" class="uuid-qr-btn" title="Show UUID QR code" style="margin-left:6px; padding:0 5px; font-size:12px; line-height:1.6; border:1px solid var(--btn-border); border-radius:4px; background:var(--btn-bg); color:var(--btn-ink); cursor:pointer;">&#128290;</button></td></tr>`;
                 if (item.name) infoHtml += `<tr><th style="width:1%; white-space:nowrap;">Name</th><td>${esc(item.name)}</td></tr>`;
                 if (item.description) infoHtml += `<tr><th style="width:1%; white-space:nowrap;">Description</th><td>${esc(item.description)}</td></tr>`;
 
@@ -6606,6 +6944,15 @@ header .chk input[type="checkbox"] {
                 if (infoHtml) {
                     infoTable.innerHTML = infoHtml;
                     det.appendChild(infoTable);
+
+                    const qrBtn = infoTable.querySelector('.uuid-qr-btn');
+                    if (qrBtn) {
+                        qrBtn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            const caption = `${label} ${item.originalId || item.id || ''}`.trim();
+                            showUuidQrModal(item.uuid, caption);
+                        });
+                    }
                 }
 
                 // --- 2. Insertion の表示 ---
@@ -7107,10 +7454,13 @@ header .chk input[type="checkbox"] {
                         container.innerHTML = '<p>Loading EMSA spectrum...</p>';
                         await renderEMSA(stored.fileData.data, container);
                     } else {
-                        // [SECURITY FIX] Sanitize stored preview HTML to prevent XSS propagation
-                        container.innerHTML = (typeof DOMPurify !== 'undefined')
-                            ? DOMPurify.sanitize(stored.preview)
-                            : stored.preview;
+                        // [SECURITY FIX] Sanitize stored preview HTML to prevent XSS propagation.
+                        // Fail closed: if DOMPurify did not load, insert as plain text (never raw HTML).
+                        if (typeof DOMPurify !== 'undefined') {
+                            container.innerHTML = DOMPurify.sanitize(stored.preview);
+                        } else {
+                            container.textContent = stored.preview;
+                        }
                     }
                 } catch (err) {
                     // [SECURITY FIX] Use esc() to prevent XSS via error messages
@@ -7807,7 +8157,7 @@ header .chk input[type="checkbox"] {
                         if (valCell) {
                             valCell.removeAttribute('id');
                             const dispVal = esc2(parsed.value);
-                            valCell.innerHTML = '<span class="decrypt-badge" title="Decrypted">🔓</span>'
+                            valCell.innerHTML = '<span class="decrypt-badge" title="Previously encrypted / Decrypted">🔓</span>'
                                 + (parsed.value
                                     ? '<div class="value-cell-scroll" style="display:inline-block;max-width:calc(100% - 22px);vertical-align:middle;" title="'
                                     + dispVal + '">' + dispVal + '</div>'
@@ -8463,9 +8813,12 @@ header .chk input[type="checkbox"] {
                 rawTextContent = rawText;
                 if (typeof marked !== 'undefined') {
                     const rawHtml = marked.parse(rawTextContent);
-                    resultDiv.innerHTML = (typeof DOMPurify !== 'undefined')
-                        ? DOMPurify.sanitize(rawHtml)
-                        : rawHtml;
+                    // Fail closed: if DOMPurify did not load, show plain text (never raw HTML).
+                    if (typeof DOMPurify !== 'undefined') {
+                        resultDiv.innerHTML = DOMPurify.sanitize(rawHtml);
+                    } else {
+                        resultDiv.textContent = rawTextContent;
+                    }
                     resultDiv.classList.add("markdown-content");
                     const disclaimer = document.createElement('div');
                     disclaimer.className = 'ai-disclaimer';
@@ -10059,9 +10412,12 @@ header .chk input[type="checkbox"] {
             // ============================================================
             const STORAGE_KEY_INDEX = 'maiml_dl_index';
             const STORAGE_KEY_FOLDER_NAME = 'maiml_dl_folder_name';
+            const STORAGE_KEY_CACHE_TIME = 'maiml_dl_cache_time';
             const DB_NAME = 'MaiMLDataLakeDB';
             const STORE_NAME = 'handles';
             const KEY_HANDLE = 'dir_handle';
+            const INDEX_STORE_NAME = 'index';
+            const KEY_INDEX_DATA = 'index_data';
 
             // ============================================================
             // STATE
@@ -10073,25 +10429,37 @@ header .chk input[type="checkbox"] {
             let dlDirHandle = null;
             let dlCurrentSort = 'date-desc';
             let dlIsCachedMode = false;
+            let dlCacheTimestamp = null;
+            let dlKeywordTerms = [];
+            let dlSearchDebounceTimer = null;
 
             // ============================================================
             // DOM REFERENCES
             // ============================================================
             let elOverlay, elPanel, elFolderName, elProgressWrap, elProgressText,
                 elProgressBarFill, elSearchArea, elKeyword, elDateFrom, elDateTo,
-                elInstrumentFilterWrap, elInstrumentList, elClearBtn, elSearchBtn,
+                elInstrumentFilterWrap, elInstrumentList,
                 elResultsHeader, elResultCount, elSelectAllChk, elResultsList,
                 elFooter, elSelectedCount, elLoadSelectedBtn, elCloseBtn,
-                elOpenFolderBtn, elFolderInput, elSortSelect;
+                elOpenFolderBtn, elFolderInput, elSortSelect, elCacheBanner,
+                elMetaFilterWrap, elCreatorFilterWrap, elCreatorList,
+                elVendorFilterWrap, elVendorList, elOwnerFilterWrap, elOwnerList,
+                elInstrumentSelectAll, elCreatorSelectAll, elVendorSelectAll, elOwnerSelectAll;
 
             // ============================================================
             // INDEXEDDB UTILITIES
             // ============================================================
             function openDB() {
                 return new Promise((resolve, reject) => {
-                    const request = indexedDB.open(DB_NAME, 1);
+                    const request = indexedDB.open(DB_NAME, 2);
                     request.onupgradeneeded = (e) => {
-                        e.target.result.createObjectStore(STORE_NAME);
+                        const db = e.target.result;
+                        if (!db.objectStoreNames.contains(STORE_NAME)) {
+                            db.createObjectStore(STORE_NAME);
+                        }
+                        if (!db.objectStoreNames.contains(INDEX_STORE_NAME)) {
+                            db.createObjectStore(INDEX_STORE_NAME);
+                        }
                     };
                     request.onsuccess = (e) => resolve(e.target.result);
                     request.onerror = (e) => reject(e.target.error);
@@ -10117,6 +10485,32 @@ header .chk input[type="checkbox"] {
                     return await new Promise((res) => { request.onsuccess = () => res(request.result); });
                 } catch (e) {
                     console.error('Failed to load handle from IndexedDB:', e);
+                    return null;
+                }
+            }
+
+            // localStorageはブラウザによって5〜10MB程度しか使えず、MaiMLファイルが
+            // 数百件規模に増えるとインデックスの保存に失敗しうる。IndexedDBは実質的に
+            // 上限がないため、Data Lakeのインデックス本体はこちらに保存する。
+            async function saveIndexDataToDB(data) {
+                try {
+                    const db = await openDB();
+                    const tx = db.transaction(INDEX_STORE_NAME, 'readwrite');
+                    tx.objectStore(INDEX_STORE_NAME).put(data, KEY_INDEX_DATA);
+                    await new Promise((res, rej) => { tx.oncomplete = res; tx.onerror = () => rej(tx.error); });
+                } catch (e) {
+                    console.error('Failed to save Data Lake index to IndexedDB:', e);
+                }
+            }
+
+            async function loadIndexDataFromDB() {
+                try {
+                    const db = await openDB();
+                    const tx = db.transaction(INDEX_STORE_NAME, 'readonly');
+                    const request = tx.objectStore(INDEX_STORE_NAME).get(KEY_INDEX_DATA);
+                    return await new Promise((res) => { request.onsuccess = () => res(request.result || null); });
+                } catch (e) {
+                    console.error('Failed to load Data Lake index from IndexedDB:', e);
                     return null;
                 }
             }
@@ -10238,16 +10632,37 @@ header .chk input[type="checkbox"] {
             async function loadCachedIndex() {
                 try {
                     const cachedFolderName = localStorage.getItem(STORAGE_KEY_FOLDER_NAME);
-                    const cachedIndexRaw = localStorage.getItem(STORAGE_KEY_INDEX);
+                    let cached = await loadIndexDataFromDB();
 
-                    if (cachedFolderName && cachedIndexRaw) {
+                    // 旧バージョン(localStorage保存)からの一度限りの移行:
+                    // IndexedDB側にまだデータがなく、localStorageに旧キャッシュが残っている場合のみ
+                    // 読み込んでIndexedDBへ移し、localStorage側は消してしまう。
+                    if (!cached) {
+                        const legacyIndexRaw = localStorage.getItem(STORAGE_KEY_INDEX);
+                        if (legacyIndexRaw) {
+                            try {
+                                cached = {
+                                    index: JSON.parse(legacyIndexRaw),
+                                    cacheTime: localStorage.getItem(STORAGE_KEY_CACHE_TIME)
+                                };
+                                await saveIndexDataToDB(cached);
+                            } catch (_) {
+                                cached = null;
+                            }
+                        }
+                        localStorage.removeItem(STORAGE_KEY_INDEX);
+                        localStorage.removeItem(STORAGE_KEY_CACHE_TIME);
+                    }
+
+                    if (cachedFolderName && cached && cached.index) {
                         elFolderName.textContent = cachedFolderName;
-                        dlIndex = JSON.parse(cachedIndexRaw);
+                        dlIndex = cached.index;
                         dlFiltered = [...dlIndex];
                         dlIsCachedMode = true;
+                        dlCacheTimestamp = cached.cacheTime;
 
                         elSearchArea.style.display = '';
-                        buildInstrumentFilter();
+                        buildMetaFilters();
                         applyFilter();
                     }
                     dlDirHandle = await loadHandleFromDB();
@@ -10256,7 +10671,7 @@ header .chk input[type="checkbox"] {
                 }
             }
 
-            function saveIndexToCache() {
+            async function saveIndexToCache() {
                 try {
                     const serializableIndex = dlIndex.map(e => ({
                         fileIdx: e.fileIdx,
@@ -10265,14 +10680,21 @@ header .chk input[type="checkbox"] {
                         date: e.date,
                         dateStr: e.dateStr,
                         sampleName: e.sampleName,
-                        operator: e.operator,
+                        creator: e.creator,
+                        vendor: e.vendor,
+                        owner: e.owner,
                         instrument: e.instrument,
                         chainId: e.chainId,
-                        searchText: e.searchText || '',
+                        hiddenFields: e.hiddenFields || [],
                         relativePath: e.relativePath,
                         isCachedOnly: true
                     }));
-                    localStorage.setItem(STORAGE_KEY_INDEX, JSON.stringify(serializableIndex));
+                    // 直近の実スキャン時刻を記録し、次回キャッシュから復元した際に
+                    // 「このリストはいつ時点のものか」をバナーで案内できるようにする。
+                    await saveIndexDataToDB({
+                        index: serializableIndex,
+                        cacheTime: new Date().toISOString()
+                    });
                 } catch (e) {
                     console.error('Failed to save Data Lake cache:', e);
                 }
@@ -10306,8 +10728,8 @@ header .chk input[type="checkbox"] {
                 showProgress(false);
                 elSearchArea.style.display = '';
 
-                saveIndexToCache();
-                buildInstrumentFilter();
+                await saveIndexToCache();
+                buildMetaFilters();
                 applyFilter();
             }
 
@@ -10351,40 +10773,54 @@ header .chk input[type="checkbox"] {
                         || doc.querySelector('*|sampleName > *|name, *|sampleName > *|value, *|sample > *|name, *|sample > *|value, *|specimenName > *|name, *|specimenName > *|value, *|specimen > *|name, *|specimen > *|value');
                     const sampleName = (sampleEl && sampleEl.textContent.trim()) ? sampleEl.textContent.trim() : (getTextByTag(doc, ns, ['sampleName', 'sample', 'specimenName', 'specimen']) || '');
 
-                    let operatorEl = doc.querySelector('operator > name, operator > value, author > name, author > value, analyst > name, analyst > value, owner > name, owner > value')
-                        || doc.querySelector('*|operator > *|name, *|operator > *|value, *|author > *|name, *|author > *|value, *|analyst > *|name, *|analyst > *|value, *|owner > *|name, *|owner > *|value');
-                    const operator = (operatorEl && operatorEl.textContent.trim()) ? operatorEl.textContent.trim() : (getTextByTag(doc, ns, ['operator', 'author', 'analyst', 'owner']) || '');
-
-                    let instrumentEl = doc.querySelector('instrumentName > name, instrument > name, deviceName > name, device > name')
-                        || doc.querySelector('*|instrumentName > *|name, *|instrument > *|name, *|deviceName > *|name, *|device > *|name');
-                    let instrument = '';
-                    if (instrumentEl && instrumentEl.textContent.trim()) {
-                        instrument = instrumentEl.textContent.trim();
-                    } else {
-                        instrument = getTextByTag(doc, ns, ['instrumentName', 'instrument', 'deviceName', 'device'])
-                            || getAttrByTag(doc, ns, ['instrumentName', 'instrument', 'deviceName', 'device'], 'name')
-                            || '';
-                    }
+                    // MaiML (JIS K0200) の <document> は creator / vendor / owner / instrument を
+                    // 子要素として定義しており、いずれも <name> (xs:QName) を持つ。
+                    // "operator"/"author"/"analyst" はMaiML規格の予約語ではないため対象外とする。
+                    const creator = getEntityName(doc, 'creator');
+                    const vendor = getEntityName(doc, 'vendor');
+                    const owner = getEntityName(doc, 'owner');
+                    const instrument = getEntityName(doc, 'instrument');
 
                     const chainEl = doc.querySelector('*|chainID, chainId, chainid');
                     const chainId = chainEl ? chainEl.textContent.trim() : '';
 
-                    // --- 拡張検索用テキスト収集 ---
-                    // 1) すべての uuid/guid/id 属性値を収集
-                    const uuidAttrValues = [];
+                    // --- 拡張検索用フィールド収集 ---
+                    // 値だけでなく「どのタグ/属性から来たか」というラベルも保持する。
+                    // これにより、ファイル名等に見当たらないキーワードでヒットした場合に
+                    // 「なぜこのファイルが出てきたか」をUI側でチップ表示できる。
+                    const hiddenFields = [];
+                    // 上限を1000に設定。処理順序は「ユーザーが検索する可能性の高いもの」を優先する:
+                    // 1) property/content の <value> テキスト（測定値・条件値）← 最優先
+                    // 2) uuid/guid/id 属性値（試料リンクのUUID検索）
+                    // 3) property/content の key 属性値（プロパティ名検索）
+                    // 4) その他のメタデータタグテキスト
+                    const HIDDEN_FIELD_CAP = 1000;
+                    const pushHidden = (label, value) => {
+                        if (hiddenFields.length >= HIDDEN_FIELD_CAP) return;
+                        const v = (value || '').trim();
+                        if (v) hiddenFields.push({ label, value: v });
+                    };
+                    // 1) property/content の子 <value> のテキスト＋親の units 属性（最優先）
+                    // 例: <property key="VendorB:AcceleratingVoltage" units="kV"><value>20.0</value></property>
+                    // → "20.0" と "20.0 kV" の両方をインデックス登録し、どちらの形でも検索できるようにする
+                    doc.querySelectorAll('property > value, content > value, *|property > *|value, *|content > *|value').forEach(el => {
+                        const txt = el.textContent.trim();
+                        if (!txt || txt.length > 200) return;
+                        const parent = el.parentElement;
+                        const units = parent ? (parent.getAttribute('units') || '').trim() : '';
+                        const key = parent ? (parent.getAttribute('key') || 'value').trim() : 'value';
+                        pushHidden(key, txt);
+                        if (units) pushHidden(key, txt + ' ' + units);
+                    });
+                    // 2) すべての uuid/guid/id 属性値
                     doc.querySelectorAll('[uuid],[guid],[id]').forEach(el => {
-                        ['uuid','guid','id'].forEach(attr => {
-                            const v = el.getAttribute(attr);
-                            if (v && v.trim()) uuidAttrValues.push(v.trim());
-                        });
+                        ['uuid', 'guid', 'id'].forEach(attr => pushHidden(attr, el.getAttribute(attr)));
                     });
-                    // 2) property/content 要素の key 属性値を収集
-                    const keyAttrValues = [];
+                    // 3) property/content 要素の key 属性値
                     doc.querySelectorAll('property[key], content[key], *|property[key], *|content[key]').forEach(el => {
-                        const k = el.getAttribute('key');
-                        if (k && k.trim()) keyAttrValues.push(k.trim());
+                        pushHidden('key', el.getAttribute('key'));
                     });
-                    // 3) よく使われるメタデータタグのテキストを収集
+                    // 4) よく使われるメタデータタグのテキスト
                     const extraTagNames = [
                         'uuid', 'guid', 'id', 'description', 'title', 'comment', 'remarks', 'note',
                         'method', 'technique', 'program', 'software', 'version', 'protocol',
@@ -10392,16 +10828,21 @@ header .chk input[type="checkbox"] {
                         'location', 'lab', 'laboratory', 'department', 'company', 'organization',
                         'material', 'substance', 'formula', 'reference', 'citation'
                     ];
-                    const extraTexts = [];
                     extraTagNames.forEach(tag => {
                         doc.querySelectorAll(tag + ', *|' + tag).forEach(el => {
                             // 子要素を持たない（テキストのみの）ノード、または直接テキストを持つ要素
                             const txt = el.textContent.trim();
-                            if (txt && txt.length <= 500) extraTexts.push(txt);
+                            if (txt && txt.length <= 500) pushHidden(tag, txt);
                         });
                     });
-                    // 4) まとめて searchText として結合（重複除去）
-                    const searchText = [...new Set([...uuidAttrValues, ...keyAttrValues, ...extraTexts])].join(' ');
+                    // 同一ラベル+値の重複を除去
+                    const seenHidden = new Set();
+                    const dedupedHidden = hiddenFields.filter(f => {
+                        const k = f.label + '␟' + f.value;
+                        if (seenHidden.has(k)) return false;
+                        seenHidden.add(k);
+                        return true;
+                    });
 
                     return {
                         fileIdx,
@@ -10411,10 +10852,12 @@ header .chk input[type="checkbox"] {
                         date: dateObj,
                         dateStr,
                         sampleName,
-                        operator,
+                        creator,
+                        vendor,
+                        owner,
                         instrument,
                         chainId,
-                        searchText,
+                        hiddenFields: dedupedHidden,
                         relativePath: file._dlRelativePath || '/'
                     };
                 } catch (_) {
@@ -10443,28 +10886,60 @@ header .chk input[type="checkbox"] {
                 return '';
             }
 
+            // <tag><name>...</name></tag> の name (xs:QName) を取り出す。
+            // creator/vendor/owner/instrument はいずれもこの形をとる。
+            // 複数存在する場合は最初の1件のみ(instrumentの既存挙動に合わせる)。
+            function getEntityName(doc, tag) {
+                const el = doc.querySelector(tag + ' > name') || doc.querySelector('*|' + tag + ' > *|name');
+                return (el && el.textContent.trim()) ? el.textContent.trim() : '';
+            }
+
             function yieldFrame() {
                 return new Promise(resolve => requestAnimationFrame(resolve));
             }
 
-            function buildInstrumentFilter() {
-                const instruments = [...new Set(dlIndex.map(e => e.instrument).filter(Boolean))].sort();
-                elInstrumentList.innerHTML = '';
-                if (instruments.length === 0) {
-                    elInstrumentFilterWrap.style.display = 'none';
+            // Instrument/Creator/Vendor/Owner の4種は同じ形のチェックボックスリストなので
+            // 共通ロジックにまとめる。fieldName は entry オブジェクトのプロパティ名。
+            function buildFilterCheckboxList(fieldName, elList, elWrap, elSelectAll) {
+                const values = [...new Set(dlIndex.map(e => e[fieldName]).filter(Boolean))].sort();
+                elList.innerHTML = '';
+                if (values.length === 0) {
+                    elWrap.style.display = 'none';
                     return;
                 }
-                elInstrumentFilterWrap.style.display = '';
-                instruments.forEach(name => {
+                elWrap.style.display = '';
+                values.forEach(name => {
                     const label = document.createElement('label');
-                    label.innerHTML = `<input type="checkbox" checked data-instrument="${esc(name)}"> ${esc(name)}`;
-                    elInstrumentList.appendChild(label);
+                    label.innerHTML = `<input type="checkbox" checked data-value="${esc(name)}"> ${esc(name)}`;
+                    elList.appendChild(label);
                 });
+                if (elSelectAll) elSelectAll.checked = true; // 新しい一覧は常に「全選択」状態から始まる
             }
 
-            function getCheckedInstruments() {
-                const chks = elInstrumentList.querySelectorAll('input[data-instrument]:checked');
-                return new Set([...chks].map(c => c.dataset.instrument));
+            function buildMetaFilters() {
+                buildFilterCheckboxList('instrument', elInstrumentList, elInstrumentFilterWrap, elInstrumentSelectAll);
+                buildFilterCheckboxList('creator', elCreatorList, elCreatorFilterWrap, elCreatorSelectAll);
+                buildFilterCheckboxList('vendor', elVendorList, elVendorFilterWrap, elVendorSelectAll);
+                buildFilterCheckboxList('owner', elOwnerList, elOwnerFilterWrap, elOwnerSelectAll);
+                // 4つのうち1つでも項目があればグリッド全体を表示する
+                const anyVisible = [elInstrumentFilterWrap, elCreatorFilterWrap, elVendorFilterWrap, elOwnerFilterWrap]
+                    .some(w => w.style.display !== 'none');
+                elMetaFilterWrap.style.display = anyVisible ? '' : 'none';
+            }
+
+            // Instrument/Creator/Vendor/Owner フィルターの通過判定。
+            // - 全選択(デフォルト) → フィルタ無効。値を持たないファイルも素通しする
+            //   (instrumentはMaiML規格上 minOccurs="0" の任意項目なので、値が無いファイルが
+            //   正当に存在し得る)。
+            // - 一部選択 → 選択された値を持つファイルのみ通す。
+            // - 全解除    → 何も通さない(0件)。creator/vendor/ownerは規格上必須項目なので、
+            //   選択肢を1つも選ばない = 該当するファイルは存在しない、という意味になる。
+            function passesMetaFilter(value, elList) {
+                const boxes = [...elList.querySelectorAll('input[data-value]')];
+                if (boxes.length === 0) return true; // この項目自体に選択肢が無い場合は素通し
+                const checkedCount = boxes.filter(c => c.checked).length;
+                if (checkedCount === boxes.length) return true;
+                return !!value && boxes.some(c => c.checked && c.dataset.value === value);
             }
 
             // ============================================================
@@ -10474,29 +10949,27 @@ header .chk input[type="checkbox"] {
             // FILTER / SORT ENGINE (OPTIMIZED FOR TWO-STAGE TREE SORTING)
             // ============================================================
             function applyFilter() {
-                const kw = (elKeyword.value || '').trim().toLowerCase();
+                const kwRaw = (elKeyword.value || '').trim().toLowerCase();
+                const terms = kwRaw.split(/\s+/).filter(Boolean);
                 const from = elDateFrom.value ? new Date(elDateFrom.value) : null;
                 const to = elDateTo.value ? new Date(elDateTo.value + 'T23:59:59') : null;
-                const instruments = getCheckedInstruments();
+
+                dlKeywordTerms = terms; // renderTreeResults()内でのハイライト表示に使用
 
                 // 1. Filter base array based on requested metadata fields
                 dlFiltered = dlIndex.filter(entry => {
-                    if (kw) {
-                        const haystack = [
-                            entry.displayName,
-                            entry.sampleName,
-                            entry.operator,
-                            entry.instrument,
-                            entry.chainId,
-                            entry.searchText || ''
-                        ].join(' ').toLowerCase();
-                        if (!haystack.includes(kw)) return false;
+                    entry._matchReasons = [];
+                    if (terms.length > 0) {
+                        const m = matchEntryTerms(entry, terms);
+                        if (!m.matched) return false;
+                        entry._matchReasons = m.reasons;
                     }
                     if (from && entry.date && new Date(entry.date) < from) return false;
                     if (to && entry.date && new Date(entry.date) > to) return false;
-                    if (instruments.size > 0 && entry.instrument) {
-                        if (!instruments.has(entry.instrument)) return false;
-                    }
+                    if (!passesMetaFilter(entry.instrument, elInstrumentList)) return false;
+                    if (!passesMetaFilter(entry.creator, elCreatorList)) return false;
+                    if (!passesMetaFilter(entry.vendor, elVendorList)) return false;
+                    if (!passesMetaFilter(entry.owner, elOwnerList)) return false;
                     return true;
                 });
 
@@ -10504,13 +10977,49 @@ header .chk input[type="checkbox"] {
                 renderTreeResults();
             }
 
-            function clearFilter() {
-                elKeyword.value = '';
-                elDateFrom.value = '';
-                elDateTo.value = '';
-                elInstrumentList.querySelectorAll('input[type="checkbox"]').forEach(c => { c.checked = true; });
-                if (elSortSelect) elSortSelect.value = 'date-desc';
-                applyFilter();
+            // 複数語を空白区切りで AND 検索する。各語は「表示中のフィールド」
+            // (ファイル名・サンプル名・オペレーター・機器・chainId) にマッチすれば十分だが、
+            // そこで見つからない場合は「隠れたフィールド」(uuid / property key / description等の
+            // タグ本文) も探す。文字数による下限は設けない — MaiMLではuuidの一致が
+            // 「同じ試料を複数機器で計測した」ことを表す規格上の重要な意味を持つため、
+            // 事前に分かっているuuidの断片で検索しても短いうちはヒットしない、という
+            // 挙動は避けたい。偶然の部分一致が混ざる可能性はあるが、マッチした場合は
+            // reasons に積んで返し、「なぜこのファイルがヒットしたか」(例: 🔎 uuid: dc65e756-…)
+            // をカード上のチップで明示するため、無関係な偶然一致が出ても由来が一目でわかる。
+            function matchEntryTerms(entry, terms) {
+                const visibleHaystack = [
+                    entry.displayName, entry.sampleName, entry.creator, entry.vendor, entry.owner, entry.instrument, entry.chainId
+                ].filter(Boolean).join(' ').toLowerCase();
+
+                const reasons = [];
+                for (const term of terms) {
+                    if (visibleHaystack.includes(term)) continue;
+                    const hit = (entry.hiddenFields || []).find(f => f.value.toLowerCase().includes(term));
+                    if (!hit) return { matched: false, reasons: [] };
+                    reasons.push(hit);
+                }
+
+                const seen = new Set();
+                const dedupedReasons = reasons.filter(r => {
+                    const k = r.label + '␟' + r.value;
+                    if (seen.has(k)) return false;
+                    seen.add(k);
+                    return true;
+                }).slice(0, 3); // カードが煩雑にならないよう最大3件まで
+
+                return { matched: true, reasons: dedupedReasons };
+            }
+
+            // 既にHTMLエスケープ済みのテキストに対して、検索語を <mark> でハイライトする。
+            // エスケープ後の文字列に対して処理するため、新たに未エスケープの文字が
+            // 混入することはない(安全)。
+            function highlightTerms(escapedText, terms) {
+                if (!terms || terms.length === 0 || !escapedText) return escapedText;
+                const escapedTerms = [...new Set(terms)].filter(Boolean)
+                    .map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+                if (escapedTerms.length === 0) return escapedText;
+                const re = new RegExp('(' + escapedTerms.join('|') + ')', 'ig');
+                return escapedText.replace(re, '<mark class="dl-hl">$1</mark>');
             }
 
             // ============================================================
@@ -10522,11 +11031,25 @@ header .chk input[type="checkbox"] {
             }
 
             function renderTreeResults() {
-                elResultCount.textContent = dlFiltered.length + ' items';
+                elResultCount.textContent = dlFiltered.length + ' / ' + dlIndex.length + ' items';
                 elResultsHeader.style.display = '';
                 elFooter.style.display = '';
                 elSelectAllChk.checked = false;
                 updateFooter();
+
+                // オフラインキャッシュ表示中であることを1箇所のバナーで案内する
+                // (以前はカード毎の赤字表示だったが、リストが煩雑になるため統合した)
+                if (elCacheBanner) {
+                    if (dlIsCachedMode) {
+                        const whenStr = dlCacheTimestamp
+                            ? new Date(dlCacheTimestamp).toLocaleString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+                            : 'a previous session';
+                        elCacheBanner.innerHTML = `📦 Showing a cached file list from <strong>${esc(whenStr)}</strong>. Click "🔄 Sync / Re-Verify" above to refresh from disk.`;
+                        elCacheBanner.style.display = 'flex';
+                    } else {
+                        elCacheBanner.style.display = 'none';
+                    }
+                }
 
                 if (dlFiltered.length === 0) {
                     elResultsList.innerHTML = `
@@ -10637,16 +11160,27 @@ header .chk input[type="checkbox"] {
                         const badges = [];
                         if (entry.chainId) badges.push(`<span class="dl-badge chain">⛓ chain</span>`);
                         if (entry.instrument) badges.push(`<span class="dl-badge instrument">${esc(entry.instrument)}</span>`);
+                        if (entry.vendor) badges.push(`<span class="dl-badge vendor">🏭 ${esc(entry.vendor)}</span>`);
+                        if (entry.owner) badges.push(`<span class="dl-badge owner">👤 ${esc(entry.owner)}</span>`);
+                        // 隠れたフィールド(uuid/property key/description等)でキーワードにマッチした
+                        // 場合、そのラベルと値をチップで示す。「なぜこのファイルが出てきたか」を
+                        // 見えるようにするための表示で、ファイル名等の見える項目でマッチした場合は
+                        // (すでにハイライトで示されるため)チップは出さない。
+                        (entry._matchReasons || []).forEach(r => {
+                            const shortVal = r.value.length > 28 ? r.value.slice(0, 28) + '…' : r.value;
+                            badges.push(`<span class="dl-badge match-reason" title="${esc(r.label + ': ' + r.value)}">🔎 ${esc(r.label)}: ${esc(shortVal)}</span>`);
+                        });
 
-                        const cacheNotice = dlIsCachedMode
-                            ? `<span style="font-size:10px; color:var(--warn); margin-left:6px; font-style:italic;">[Offline Cache - Click 🔄 to Update]</span>`
-                            : '';
+                        const terms = dlKeywordTerms;
+                        const nameHtml = highlightTerms(esc(entry.displayName), terms);
+                        const sampleHtml = entry.sampleName ? ' · ' + highlightTerms(esc(entry.sampleName), terms) : '';
+                        const creatorHtml = entry.creator ? ' · ' + highlightTerms(esc(entry.creator), terms) : '';
 
                         card.innerHTML = `
                         <input type="checkbox" class="dl-card-chk" data-idx="${filteredIdx}" style="margin-top:4px;accent-color:var(--accent);">
                         <div class="dl-card-info">
-                            <div class="dl-card-name" data-idx="${filteredIdx}" title="${esc(entry.displayName)}">${esc(entry.displayName)}${cacheNotice}</div>
-                            <div class="dl-card-meta">${dateLabel} · ${sizeLabel}${entry.sampleName ? ' · ' + esc(entry.sampleName) : ''}${entry.operator ? ' · ' + esc(entry.operator) : ''}</div>
+                            <div class="dl-card-name" data-idx="${filteredIdx}" title="${esc(entry.displayName)}">${nameHtml}</div>
+                            <div class="dl-card-meta">${dateLabel} · ${sizeLabel}${sampleHtml}${creatorHtml}</div>
                             ${badges.length ? `<div class="dl-card-badges">${badges.join('')}</div>` : ''}
                         </div>`;
 
@@ -10831,19 +11365,49 @@ header .chk input[type="checkbox"] {
                 elKeyword = document.getElementById('dlKeywordInput');
                 elDateFrom = document.getElementById('dlDateFrom');
                 elDateTo = document.getElementById('dlDateTo');
+                elMetaFilterWrap = document.getElementById('dlMetaFilterWrap');
                 elInstrumentFilterWrap = document.getElementById('dlInstrumentFilterWrap');
                 elInstrumentList = document.getElementById('dlInstrumentList');
-                elClearBtn = document.getElementById('dlClearBtn');
-                elSearchBtn = document.getElementById('searchBtn') || document.getElementById('dlSearchBtn');
+                elCreatorFilterWrap = document.getElementById('dlCreatorFilterWrap');
+                elCreatorList = document.getElementById('dlCreatorList');
+                elVendorFilterWrap = document.getElementById('dlVendorFilterWrap');
+                elVendorList = document.getElementById('dlVendorList');
+                elOwnerFilterWrap = document.getElementById('dlOwnerFilterWrap');
+                elOwnerList = document.getElementById('dlOwnerList');
+                elInstrumentSelectAll = document.getElementById('dlInstrumentSelectAll');
+                elCreatorSelectAll = document.getElementById('dlCreatorSelectAll');
+                elVendorSelectAll = document.getElementById('dlVendorSelectAll');
+                elOwnerSelectAll = document.getElementById('dlOwnerSelectAll');
+
+                // 各メタデータフィルターの「Select All」チェックボックスと一覧を連動させる。
+                // Select All を切り替えると一覧全体がON/OFFされ、逆に一覧内の項目を
+                // 個別にON/OFFすると、全項目が揃っているかどうかに応じて Select All 側も
+                // 自動的に追従する(下部の全体Select Allと同じ考え方)。
+                function wireSelectAllCheckbox(elSelectAll, elList) {
+                    elSelectAll.addEventListener('change', () => {
+                        elList.querySelectorAll('input[type="checkbox"]').forEach(c => { c.checked = elSelectAll.checked; });
+                        applyFilter(); // キーワード検索・日付と同様、即座に絞り込む
+                    });
+                    elList.addEventListener('change', (e) => {
+                        if (!e.target.matches('input[type="checkbox"]')) return;
+                        const all = [...elList.querySelectorAll('input[type="checkbox"]')];
+                        elSelectAll.checked = all.length > 0 && all.every(c => c.checked);
+                        applyFilter();
+                    });
+                }
+                wireSelectAllCheckbox(elInstrumentSelectAll, elInstrumentList);
+                wireSelectAllCheckbox(elCreatorSelectAll, elCreatorList);
+                wireSelectAllCheckbox(elVendorSelectAll, elVendorList);
+                wireSelectAllCheckbox(elOwnerSelectAll, elOwnerList);
                 elResultsHeader = document.getElementById('dlResultsHeader');
                 elResultCount = document.getElementById('dlResultCount');
-                elSelectAllChk = document.getElementById('dlSelectAllChk');
                 elResultsList = document.getElementById('dlResultsList');
                 elFooter = document.getElementById('dlFooter');
                 elSelectedCount = document.getElementById('dlSelectedCount');
                 elLoadSelectedBtn = document.getElementById('dlLoadSelectedBtn');
                 elCloseBtn = document.getElementById('dlCloseBtn');
                 elOpenFolderBtn = document.getElementById('openFolderBtn');
+                elCacheBanner = document.getElementById('dlCacheBanner');
 
                 // ★改善: SORT ORDERとEXPAND/COLLAPSEコントロールを「ファイル一覧の直上」に綺麗に横並びで配置
                 const controlHeaderCard = document.createElement('div');
@@ -10859,9 +11423,13 @@ header .chk input[type="checkbox"] {
                                 <option value="size-desc">💾 File Size (Large)</option>
                             </select>
                         </div>
-                        <div style="font-size: 11px; white-space: nowrap; padding-right: 0.2rem;">
+                        <div style="display: flex; align-items: center; gap: 0.6rem; font-size: 11px; white-space: nowrap; padding-right: 0.2rem;">
+                            <label style="display:flex;align-items:center;gap:4px;cursor:pointer;color:var(--muted);">
+                                <input type="checkbox" id="dlSelectAllChk" style="accent-color:var(--accent);"> Select All
+                            </label>
+                            <span style="color: var(--border);">|</span>
                             <span id="dlExpandAllLink" style="color: var(--accent); cursor: pointer; text-decoration: underline; user-select: none;">Expand All</span>
-                            <span style="color: var(--border);"> | </span>
+                            <span style="color: var(--border);">|</span>
                             <span id="dlCollapseAllLink" style="color: var(--accent); cursor: pointer; text-decoration: underline; user-select: none;">Collapse All</span>
                         </div>
                     </div>
@@ -10869,6 +11437,10 @@ header .chk input[type="checkbox"] {
 
                 // Results Header（件数表示部分）のすぐ後ろ、リストの直前に挿入
                 elResultsHeader.parentNode.insertBefore(controlHeaderCard, elResultsHeader.nextSibling);
+
+                // Select All は Sort行(このcontrolHeaderCard内)に移設したため、
+                // カードが挿入された後でなければ要素が存在しない。
+                elSelectAllChk = document.getElementById('dlSelectAllChk');
 
                 elSortSelect = document.getElementById('dlSortSelect');
                 elSortSelect.addEventListener('change', () => applyFilter());
@@ -10881,13 +11453,13 @@ header .chk input[type="checkbox"] {
                 btnContainer.style.cssText = "display:flex; gap:0.4rem; margin-top:0.4rem; width:100%; box-sizing:border-box;";
 
                 const syncBtn = document.createElement('button');
-                syncBtn.className = "btn primary";
+                syncBtn.className = "dl-hdr-btn dl-hdr-btn-primary";
                 syncBtn.style.flex = "1";
                 syncBtn.innerHTML = "🔄 Sync / Re-Verify";
                 syncBtn.addEventListener('click', syncFolder);
 
                 const changeFolderBtn = document.createElement('button');
-                changeFolderBtn.className = "btn";
+                changeFolderBtn.className = "dl-hdr-btn dl-hdr-btn-secondary";
                 changeFolderBtn.style.flex = "1";
                 changeFolderBtn.innerHTML = "📁 Change Folder";
                 changeFolderBtn.addEventListener('click', selectFolder);
@@ -10925,14 +11497,23 @@ header .chk input[type="checkbox"] {
                     updateFooter();
                 });
 
-                if (elSearchBtn) {
-                    elSearchBtn.addEventListener('click', (e) => {
+                // ライブ検索: 入力のたびに(200msデバウンスして)自動で絞り込む。
+                // Enterキーは即時実行(デバウンス待ちをスキップ)するために残す。
+                elKeyword.addEventListener('input', () => {
+                    clearTimeout(dlSearchDebounceTimer);
+                    dlSearchDebounceTimer = setTimeout(() => applyFilter(), 200);
+                });
+                elKeyword.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
                         e.preventDefault();
+                        clearTimeout(dlSearchDebounceTimer);
                         applyFilter();
-                    });
-                }
-                elKeyword.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); applyFilter(); } });
-                elClearBtn.addEventListener('click', clearFilter);
+                    }
+                });
+                // 日付範囲: キーワード検索と同様、確定(change)したら即座に絞り込む。
+                // 日付ピッカーは1回の操作で1回だけ change が発火するのでデバウンスは不要。
+                elDateFrom.addEventListener('change', () => applyFilter());
+                elDateTo.addEventListener('change', () => applyFilter());
                 elLoadSelectedBtn.addEventListener('click', openSelected);
 
                 document.addEventListener('keydown', (e) => {
