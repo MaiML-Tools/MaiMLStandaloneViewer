@@ -1,3 +1,8 @@
+
+<p align="right">
+  <a href="https://github.com/MaiML-Tools/MaiMLStandaloneViewer/blob/main/README-en.md"><img alt="English README" src="https://img.shields.io/badge/📖_README-English-2b6cb0?style=for-the-badge"></a>
+</p>
+
 # MaiMLStandaloneViewer
 
 MaiML (Measurement Analysis Instrument Markup Language) ファイルを可視化・分析するためのスタンドアロン Webアプリケーション。
