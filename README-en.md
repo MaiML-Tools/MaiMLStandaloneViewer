@@ -95,7 +95,7 @@ Supports exporting data in multiple formats:
 ## 🚀 How to Use
 
 ### Installation and Launch
-1. Download `HTML-MaiMLViewer.html`
+1. Download `MaiMLStandaloneViewer.html`
 2. Open it directly in your browser (no server required)
 3. Or serve it from any web server
 
