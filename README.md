@@ -100,7 +100,7 @@ MaiML (Measurement Analysis Instrument Markup Language) ファイルを可視化
 ## 🚀 使用方法
 
 ### インストール・実行
-1. `HTML-MaiMLViewer.html` をダウンロード
+1. `MaiMLStandaloneViewer.html` をダウンロード
 2. ブラウザで直接開く（サーバー不要）
 3. または任意のWebサーバーで配信
 
