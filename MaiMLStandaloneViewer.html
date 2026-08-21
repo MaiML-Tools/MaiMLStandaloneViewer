@@ -5,6 +5,37 @@
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1" name="viewport" />
     <title>MaiMLStandaloneViewer</title>
+<!--
+
+  本ツールは以下のオープンソースソフトウェアを内包しています。
+  いずれも無償で利用でき、下記の著作権表示と許諾条件のもとで再配布されます。
+
+  - qrcodejs 1.0.0 — MIT
+      Copyright (c) 2012 Sangmin Shim
+      https://github.com/davidshimjs/qrcodejs
+  - JSZip 3.10.1 — MIT または GPLv3 のデュアルライセンス（本ツールは MIT を選択）
+      Copyright (c) 2009-2016 Stuart Knightley
+      https://github.com/Stuk/jszip
+  - dagre 0.8.5 / graphlib — MIT
+      Copyright (c) 2012-2014 Chris Pettitt
+      https://github.com/dagrejs/dagre
+  - lodash（dagre 同梱） — MIT
+      Copyright OpenJS Foundation and other contributors
+      https://github.com/lodash/lodash
+  - marked 11.1.1 — MIT
+      Copyright (c) 2011-2024, Christopher Jeffrey and contributors
+      https://github.com/markedjs/marked
+  - d3 (v7 系) — ISC
+      Copyright 2010-2023 Mike Bostock
+      https://github.com/d3/d3
+
+  MIT License:
+  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+  ISC License:
+  Permission to use, copy, modify, and/or distribute this software for any purpose with or without fee is hereby granted, provided that the above copyright notice and this permission notice appear in all copies. THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+-->
+
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
     <style>
@@ -1906,7 +1937,11 @@ header .chk input[type="checkbox"] {
 
         <!-- Progress -->
         <div class="dl-progress-wrap" id="dlProgressWrap">
-            <div class="dl-progress-text" id="dlProgressText">Loading...</div>
+            <div style="display:flex; align-items:center; gap:8px;">
+                <div class="dl-progress-text" id="dlProgressText" style="flex:1;">Loading...</div>
+                <button id="dlScanCancelBtn" onclick="dlCancelScan()" style="display:none;
+                        font-size:11px; padding:2px 8px; cursor:pointer;">中止</button>
+            </div>
             <div class="dl-progress-bar-track">
                 <div class="dl-progress-bar-fill" id="dlProgressBarFill"></div>
             </div>
@@ -1917,8 +1952,10 @@ header .chk input[type="checkbox"] {
             <!-- Keyword -->
             <div>
                 <div class="dl-filter-label">Keyword Search</div>
-                <input type="text" id="dlKeywordInput" placeholder="Filename, Sample, Creator, Vendor, Owner..." autocomplete="off">
+                <input type="text" id="dlKeywordInput" placeholder="Filename, key, value, description, UUID …" autocomplete="off">
             </div>
+            <div id="dlUnindexedNotice" style="display:none; margin-top:6px; font-size:11px;
+                 color:#b45309;"></div>
             <!-- Date Range -->
             <div>
                 <div class="dl-filter-label">Date Range</div>
@@ -2321,6 +2358,14 @@ header .chk input[type="checkbox"] {
 
             <div class="modal-body" style="padding: 2rem; overflow-y: auto; flex-grow: 1; line-height: 1.7;">
 
+<details style="margin-bottom:1.5rem; border:1px solid rgba(128,128,128,0.35); border-radius:6px; padding:8px 12px;">
+  <summary style="cursor:pointer; font-weight:600;">オープンソースライセンス / Open Source Licenses</summary>
+  <div style="font-size:0.85em; line-height:1.6; margin-top:8px;">
+    <p>本ツールは以下のオープンソースソフトウェアを内包しています。いずれも無償で利用でき、下記の著作権表示と許諾条件のもとで再配布されます。</p>
+    <ul style="padding-left:1.2em;"><li style="margin-bottom:6px;"><strong>qrcodejs 1.0.0</strong> — MIT<br><span style="opacity:0.75;">Copyright (c) 2012 Sangmin Shim</span><br><span style="opacity:0.6; font-size:0.9em;">https://github.com/davidshimjs/qrcodejs</span></li><li style="margin-bottom:6px;"><strong>JSZip 3.10.1</strong> — MIT または GPLv3 のデュアルライセンス（本ツールは MIT を選択）<br><span style="opacity:0.75;">Copyright (c) 2009-2016 Stuart Knightley</span><br><span style="opacity:0.6; font-size:0.9em;">https://github.com/Stuk/jszip</span></li><li style="margin-bottom:6px;"><strong>dagre 0.8.5 / graphlib</strong> — MIT<br><span style="opacity:0.75;">Copyright (c) 2012-2014 Chris Pettitt</span><br><span style="opacity:0.6; font-size:0.9em;">https://github.com/dagrejs/dagre</span></li><li style="margin-bottom:6px;"><strong>lodash（dagre 同梱）</strong> — MIT<br><span style="opacity:0.75;">Copyright OpenJS Foundation and other contributors</span><br><span style="opacity:0.6; font-size:0.9em;">https://github.com/lodash/lodash</span></li><li style="margin-bottom:6px;"><strong>marked 11.1.1</strong> — MIT<br><span style="opacity:0.75;">Copyright (c) 2011-2024, Christopher Jeffrey and contributors</span><br><span style="opacity:0.6; font-size:0.9em;">https://github.com/markedjs/marked</span></li><li style="margin-bottom:6px;"><strong>d3 (v7 系)</strong> — ISC<br><span style="opacity:0.75;">Copyright 2010-2023 Mike Bostock</span><br><span style="opacity:0.6; font-size:0.9em;">https://github.com/d3/d3</span></li></ul>
+    <p style="margin-top:8px;"><strong>MIT License</strong><br>Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</p><p style="margin-top:8px;"><strong>ISC License</strong><br>Permission to use, copy, modify, and/or distribute this software for any purpose with or without fee is hereby granted, provided that the above copyright notice and this permission notice appear in all copies. THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.</p>
+  </div>
+</details>
                 <div id="manual-jp" style="display: block;">
                     <div style="margin-bottom: 2.5rem;">
                         <h2
@@ -10679,13 +10724,11 @@ header .chk input[type="checkbox"] {
                         size: e.size,
                         date: e.date,
                         dateStr: e.dateStr,
-                        sampleName: e.sampleName,
                         creator: e.creator,
                         vendor: e.vendor,
                         owner: e.owner,
                         instrument: e.instrument,
-                        chainId: e.chainId,
-                        hiddenFields: e.hiddenFields || [],
+                        uuids: e.uuids || [],
                         relativePath: e.relativePath,
                         isCachedOnly: true
                     }));
@@ -10703,9 +10746,15 @@ header .chk input[type="checkbox"] {
             // ============================================================
             // INDEX BUILDER
             // ============================================================
+            // 索引作成は全文を文字列化して DOM を組むため、極端に大きいファイルは
+            // メモリを使い切ってタブごと落ちる。ここで足切りし、理由を残して表示する。
+            const DL_MAX_INDEX_MB = 64;
+            let dlUnindexed = [];
+
             async function buildIndex(files) {
                 dlAllFiles = files;
                 dlIndex = [];
+                dlUnindexed = [];
 
                 showProgress(true, 'Indexing 0 / ' + files.length, 0);
                 elSearchArea.style.display = 'none';
@@ -10719,18 +10768,264 @@ header .chk input[type="checkbox"] {
                     elProgressText.textContent = `Indexing ${i + 1} / ${files.length} (${file.name})`;
                     elProgressBarFill.style.width = pct + '%';
 
+                    if (file.size > DL_MAX_INDEX_MB * 1048576) {
+                        dlUnindexed.push({
+                            name: file.name,
+                            reason: `サイズ超過（${(file.size / 1048576).toFixed(0)} MB > ${DL_MAX_INDEX_MB} MB）`
+                        });
+                        continue;
+                    }
+
                     const entry = await indexFile(file, i);
                     if (entry) dlIndex.push(entry);
+                    else dlUnindexed.push({ name: file.name, reason: 'XMLとして読めない、またはMaiMLではない' });
 
                     if (i % 5 === 0) await yieldFrame();
                 }
 
                 showProgress(false);
+                renderUnindexedNotice();
                 elSearchArea.style.display = '';
 
                 await saveIndexToCache();
                 buildMetaFilters();
                 applyFilter();
+            }
+
+
+            // 索引できなかったファイルを知らせる。黙って一覧から消えると
+            // 「同期したのに出てこない」という形でしか気づけないため。
+            function renderUnindexedNotice() {
+                const box = document.getElementById('dlUnindexedNotice');
+                if (!box) return;
+                if (!dlUnindexed.length) { box.style.display = 'none'; box.innerHTML = ''; return; }
+                const rows = dlUnindexed.slice(0, 50)
+                    .map(u => `<li>${esc(u.name)} — ${esc(u.reason)}</li>`).join('');
+                const more = dlUnindexed.length > 50
+                    ? `<div style="opacity:0.7;">他 ${dlUnindexed.length - 50} 件</div>` : '';
+                box.style.display = '';
+                box.innerHTML = `<details><summary style="cursor:pointer;">`
+                    + `⚠ ${dlUnindexed.length} 件を索引できませんでした（検索結果に出ません）</summary>`
+                    + `<ul style="padding-left:1.2em; margin:6px 0;">${rows}</ul>${more}`
+                    + `<div style="opacity:0.75;">サイズ超過のファイルも「全ファイルを直接走査」なら検索できます。</div>`
+                    + `</details>`;
+            }
+
+            // ══════════════════════════════════════════════
+            //  索引を介さない直接走査
+            // ══════════════════════════════════════════════
+            // 索引は絞り込み用の少数の項目(日付・装置・作成者・ベンダー・所有者・UUID・
+            // ファイル名)しか持たない。property の key/value や description といった任意の語は
+            // ここでファイル本文をそのまま読んで探す。1 ファイルあたりの要素数はベンダーや
+            // 計測手法で変わるため、索引側に上限を設ける設計では取りこぼしが避けられなかった。
+            // 本文走査なら取りこぼしが無く、DOM を組まないためチャンク読みで巨大ファイルも扱える。
+            // 代償: 毎回ファイルを読み直すので遅い。OneDrive のオンラインのみファイルは
+            //       ダウンロードが走る。base64 データの中身に偶然一致することがある。
+            const DL_SCAN = { chunkMB: 8, contextChars: 60, zipMaxMB: 64 };
+            // 索引が 0 件のとき自動で直接走査に回す上限。これを超える規模では
+            // 勝手に数十秒待たせないよう、その場のボタンで選んでもらう。
+            const DL_SCAN_AUTO_MB = 200;
+            // キーワードがある間は必ず本文も走査し、索引の結果と合併する。
+            // 索引はファイル名・装置名などしか持たないので、本文走査が無いと
+            // property の値やプロパティ名では何も見つからない。
+            // 入力のたびに走らせないよう、打ち終わりを待ってから実行する。
+            const DL_SCAN_DEBOUNCE_MS = 600;
+            let dlScanTimer = null;
+            let dlScanPending = false;
+
+            function scheduleDirectScan(kw) {
+                clearTimeout(dlScanTimer);
+                dlScanPending = false;
+                // 走っている走査は古いキーワードのものなので捨てる（結果の食い違いを防ぐ）
+                if (dlScanRunning) dlScanToken++;
+                if (!kw || kw.length < 2) return;
+                if (!dlAllFiles.length && !dlDirHandle) return;   // 走査できる実体が無い
+                const targets = dlAllFiles.length ? dlScanCandidates() : [];
+                if (dlAllFiles.length && targets.length === 0) return;  // フィルターで既に0件
+                const mb = targets.reduce((s, f) => s + f.size, 0) / 1048576;
+                if (mb > DL_SCAN_AUTO_MB) {                       // 大規模は自動で走らせない
+                    dlScanTooBig = { mb, kw };
+                    return;
+                }
+                dlScanTooBig = null;
+                dlScanPending = true;
+                dlScanTimer = setTimeout(() => { dlScanPending = false; dlDirectScan(true); },
+                    DL_SCAN_DEBOUNCE_MS);
+            }
+            let dlScanTooBig = null;
+
+            let dlScanRunning = false;   // 走査中フラグ
+            let dlScanToken = 0;         // これが変わると走査中のループは自分を中断する
+
+            // 走査を中止する。キーワードを変えたときも同じ仕組みで古い走査を捨てる。
+            window.dlCancelScan = function () {
+                dlScanToken++;
+                dlScanRunning = false;
+                showProgress(false);
+                const b = document.getElementById('dlScanCancelBtn');
+                if (b) b.style.display = 'none';
+            };
+            let dlScanNotice = null;     // 直下の一覧が走査結果であることの表示用
+
+            async function dlScanPlain(file, needle, aborted) {
+                const step = DL_SCAN.chunkMB * 1048576;
+                const overlap = Math.max(0, needle.length - 1);
+                for (let start = 0; start < file.size; start += step) {
+                    if (aborted && aborted()) return null;
+                    if (start > 0) await yieldFrame();   // 大きいファイルでも画面を止めない
+                    const end = Math.min(file.size, start + step + overlap);
+                    const text = await file.slice(start, end).text();
+                    const at = text.toLowerCase().indexOf(needle);
+                    if (at >= 0) {
+                        const from = Math.max(0, at - DL_SCAN.contextChars);
+                        return text.slice(from, at + needle.length + DL_SCAN.contextChars).replace(/\s+/g, ' ');
+                    }
+                    if (end >= file.size) break;
+                }
+                return null;
+            }
+
+            async function dlScanZip(file, needle) {
+                if (typeof JSZip === 'undefined') return null;
+                if (file.size > DL_SCAN.zipMaxMB * 1048576) return 'SKIP';
+                const zip = await JSZip.loadAsync(await file.arrayBuffer());
+                for (const [name, entry] of Object.entries(zip.files)) {
+                    const l = name.toLowerCase();
+                    if (entry.dir || !(l.endsWith('.maiml') || l.endsWith('.xml') || l.endsWith('.mai'))) continue;
+                    const text = await entry.async('text');
+                    const at = text.toLowerCase().indexOf(needle);
+                    if (at >= 0) {
+                        const from = Math.max(0, at - DL_SCAN.contextChars);
+                        return text.slice(from, at + needle.length + DL_SCAN.contextChars).replace(/\s+/g, ' ');
+                    }
+                }
+                return null;
+            }
+
+            // 走査結果は「索引に無かったので本文を読んで見つけた」だけで、
+            // ファイルとしては通常の検索結果と同じもの。既存の索引エントリを流用し、
+            // 無ければ最小限のエントリを組み立てて、通常の結果一覧に出す。
+            async function dlEntryForFile(file, idx) {
+                const known = dlIndex.find(e =>
+                    e.file === file || e.displayName === file.name);
+                if (known) return known;
+                // 索引作成は全文を DOM に載せるため、大きいファイルではタブが落ちる。
+                // 走査でヒットしただけのファイルに対して無理に索引を作らない。
+                if (file.size <= DL_MAX_INDEX_MB * 1048576) {
+                    const built = await indexFile(file, dlIndex.length + idx);
+                    if (built) return built;
+                }
+                // 巨大すぎる・壊れている等で索引を作れないファイルも、一覧には出す
+                return {
+                    fileIdx: dlIndex.length + idx, file,
+                    displayName: file.name, size: file.size,
+                    date: file.lastModified ? new Date(file.lastModified) : null, dateStr: '',
+                    creator: '', vendor: '', owner: '', instrument: '', uuids: [],
+                    relativePath: file._dlRelativePath || '/'
+                };
+            }
+
+            // merge=true のとき、索引で当たった結果(dlFiltered)と合併する
+            window.dlDirectScan = async function (merge) {
+                const kw = (elKeyword.value || '').trim().toLowerCase();
+                if (!kw) return;
+                const fromIndex = merge ? dlFiltered.slice() : [];
+
+                if (!dlAllFiles.length && dlDirHandle) {   // キャッシュから復元した直後など
+                    const walked = [];
+                    await recurseDir(dlDirHandle, '', walked);
+                    dlAllFiles = walked;
+                }
+                // フィルターを通ったファイルだけを走査する（キーワードとは AND 条件）
+                const files = dlScanCandidates();
+                if (!dlAllFiles.length) {
+                    elResultsList.innerHTML = `
+                    <div class="dl-empty-state">
+                        <div class="dl-empty-icon">📁</div>
+                        <div>フォルダが開かれていません</div>
+                        <div style="font-size:11px; opacity:0.8; margin-top:6px;">
+                            Open Folder でフォルダを選び直してください。
+                        </div>
+                    </div>`;
+                    return;
+                }
+
+                const token = ++dlScanToken;
+                dlScanRunning = true;
+                const hits = [];
+                let skipped = 0, failed = 0, readBytes = 0;
+                const total = files.reduce((s, f) => s + f.size, 0);
+                const t0 = performance.now();
+                const cancelBtn = document.getElementById('dlScanCancelBtn');
+                if (cancelBtn) cancelBtn.style.display = '';
+                let cancelled = false;
+
+                // 進捗は毎ファイル更新する。1 ファイルに時間がかかると
+                // 「固まった」と受け取られるため、読み終えた量と経過秒も出す。
+                for (let i = 0; i < files.length; i++) {
+                    if (token !== dlScanToken) { cancelled = true; break; }
+                    const f = files[i];
+                    const sec = ((performance.now() - t0) / 1000).toFixed(0);
+                    showProgress(true,
+                        `本文を検索中 ${i + 1} / ${files.length} 件`
+                        + `（${(readBytes / 1048576).toFixed(0)} / ${(total / 1048576).toFixed(0)} MB・${sec} 秒）`
+                        + ` ${f.name.slice(0, 40)}`,
+                        Math.round((readBytes / Math.max(total, 1)) * 100));
+                    await yieldFrame();
+                    try {
+                        const isZip = f.name.toLowerCase().endsWith('.zip');
+                        const snippet = isZip ? await dlScanZip(f, kw) : await dlScanPlain(f, kw, () => token !== dlScanToken);
+                        readBytes += f.size;
+                        if (snippet === 'SKIP') { skipped++; continue; }
+                        if (snippet) hits.push({ file: f, snippet });
+                    } catch (e) { failed++; }
+                }
+                showProgress(false);
+                if (cancelBtn) cancelBtn.style.display = 'none';
+                if (cancelled) { dlScanRunning = false; return; }   // 新しい検索に譲る
+
+                const entries = [];
+                for (let i = 0; i < hits.length; i++) {
+                    const e = await dlEntryForFile(hits[i].file, i);
+                    if (!passesNonKeyword(e)) continue;   // 日付やフィルターに合わないものは除く
+                    e._matchReasons = [{ label: '本文', value: hits[i].snippet }];
+                    entries.push(e);
+                }
+
+                // 索引で当たった分と合併する（同じファイルは索引側のエントリを残す）
+                const seen = new Set(fromIndex.map(e => e.displayName));
+                const added = entries.filter(e => !seen.has(e.displayName));
+                const merged = fromIndex.concat(added);
+
+                dlScanRunning = false;
+                dlScanTooBig = null;
+                dlScanNotice = {
+                    keyword: elKeyword.value.trim(),
+                    fromIndex: fromIndex.length,
+                    fromScan: added.length,
+                    total: merged.length,
+                    sec: ((performance.now() - t0) / 1000).toFixed(1),
+                    scanned: files.length, skipped, failed
+                };
+                dlFiltered = merged;
+                dlChecked.clear();
+                renderTreeResults();
+                renderScanNotice();
+            };
+
+            // 出すのは利用者が行動できる情報だけにする。
+            // 探し方の内部事情（索引か本文か）は関心事ではなく、不安を与えるだけなので出さない。
+            function renderScanNotice() {
+                if (!dlScanNotice) return;
+                const n = dlScanNotice;
+                if (!n.skipped && !n.failed) return;
+                const bar = document.createElement('div');
+                bar.style.cssText = 'margin:0.3rem 0.4rem; padding:6px 8px; font-size:11px;'
+                    + 'border:1px dashed #b45309; color:#b45309; border-radius:6px;';
+                bar.innerHTML = `⚠ 検索できなかったファイルがあります`
+                    + (n.skipped ? ` ／ ZIPが大きすぎてスキップ ${n.skipped} 件` : '')
+                    + (n.failed ? ` ／ 読み取り失敗 ${n.failed} 件` : '');
+                elResultsList.prepend(bar);
             }
 
             async function indexFile(file, fileIdx) {
@@ -10769,10 +11064,6 @@ header .chk input[type="checkbox"] {
                         || '';
                     const dateObj = dateStr ? new Date(dateStr) : (file.lastModified ? new Date(file.lastModified) : null);
 
-                    let sampleEl = doc.querySelector('sampleName > name, sampleName > value, sample > name, sample > value, specimenName > name, specimenName > value, specimen > name, specimen > value')
-                        || doc.querySelector('*|sampleName > *|name, *|sampleName > *|value, *|sample > *|name, *|sample > *|value, *|specimenName > *|name, *|specimenName > *|value, *|specimen > *|name, *|specimen > *|value');
-                    const sampleName = (sampleEl && sampleEl.textContent.trim()) ? sampleEl.textContent.trim() : (getTextByTag(doc, ns, ['sampleName', 'sample', 'specimenName', 'specimen']) || '');
-
                     // MaiML (JIS K0200) の <document> は creator / vendor / owner / instrument を
                     // 子要素として定義しており、いずれも <name> (xs:QName) を持つ。
                     // "operator"/"author"/"analyst" はMaiML規格の予約語ではないため対象外とする。
@@ -10781,69 +11072,20 @@ header .chk input[type="checkbox"] {
                     const owner = getEntityName(doc, 'owner');
                     const instrument = getEntityName(doc, 'instrument');
 
-                    const chainEl = doc.querySelector('*|chainID, chainId, chainid');
-                    const chainId = chainEl ? chainEl.textContent.trim() : '';
+                    // 試料UUIDの一致は「同じ試料を複数装置で測った」ことを表す規格上の要で、
+                    // 本機能の主用途でもある。1ファイルのUUIDは数十個に収まり、property のように
+                    // ベンダーや計測手法で桁が変わることがないため、索引に丸ごと持つ。
+                    // これによりファイルが読めないキャッシュ表示中でも UUID 検索は必ず効く。
+                    const uuids = [...new Set(
+                        Array.from(doc.querySelectorAll('uuid, *|uuid'))
+                            .map(el => (el.textContent || '').trim().toLowerCase())
+                            .filter(Boolean)
+                    )];
 
-                    // --- 拡張検索用フィールド収集 ---
-                    // 値だけでなく「どのタグ/属性から来たか」というラベルも保持する。
-                    // これにより、ファイル名等に見当たらないキーワードでヒットした場合に
-                    // 「なぜこのファイルが出てきたか」をUI側でチップ表示できる。
-                    const hiddenFields = [];
-                    // 上限を1000に設定。処理順序は「ユーザーが検索する可能性の高いもの」を優先する:
-                    // 1) property/content の <value> テキスト（測定値・条件値）← 最優先
-                    // 2) uuid/guid/id 属性値（試料リンクのUUID検索）
-                    // 3) property/content の key 属性値（プロパティ名検索）
-                    // 4) その他のメタデータタグテキスト
-                    const HIDDEN_FIELD_CAP = 1000;
-                    const pushHidden = (label, value) => {
-                        if (hiddenFields.length >= HIDDEN_FIELD_CAP) return;
-                        const v = (value || '').trim();
-                        if (v) hiddenFields.push({ label, value: v });
-                    };
-                    // 1) property/content の子 <value> のテキスト＋親の units 属性（最優先）
-                    // 例: <property key="VendorB:AcceleratingVoltage" units="kV"><value>20.0</value></property>
-                    // → "20.0" と "20.0 kV" の両方をインデックス登録し、どちらの形でも検索できるようにする
-                    doc.querySelectorAll('property > value, content > value, *|property > *|value, *|content > *|value').forEach(el => {
-                        const txt = el.textContent.trim();
-                        if (!txt || txt.length > 200) return;
-                        const parent = el.parentElement;
-                        const units = parent ? (parent.getAttribute('units') || '').trim() : '';
-                        const key = parent ? (parent.getAttribute('key') || 'value').trim() : 'value';
-                        pushHidden(key, txt);
-                        if (units) pushHidden(key, txt + ' ' + units);
-                    });
-                    // 2) すべての uuid/guid/id 属性値
-                    doc.querySelectorAll('[uuid],[guid],[id]').forEach(el => {
-                        ['uuid', 'guid', 'id'].forEach(attr => pushHidden(attr, el.getAttribute(attr)));
-                    });
-                    // 3) property/content 要素の key 属性値
-                    doc.querySelectorAll('property[key], content[key], *|property[key], *|content[key]').forEach(el => {
-                        pushHidden('key', el.getAttribute('key'));
-                    });
-                    // 4) よく使われるメタデータタグのテキスト
-                    const extraTagNames = [
-                        'uuid', 'guid', 'id', 'description', 'title', 'comment', 'remarks', 'note',
-                        'method', 'technique', 'program', 'software', 'version', 'protocol',
-                        'project', 'experiment', 'condition', 'parameter', 'keyword', 'tag',
-                        'location', 'lab', 'laboratory', 'department', 'company', 'organization',
-                        'material', 'substance', 'formula', 'reference', 'citation'
-                    ];
-                    extraTagNames.forEach(tag => {
-                        doc.querySelectorAll(tag + ', *|' + tag).forEach(el => {
-                            // 子要素を持たない（テキストのみの）ノード、または直接テキストを持つ要素
-                            const txt = el.textContent.trim();
-                            if (txt && txt.length <= 500) pushHidden(tag, txt);
-                        });
-                    });
-                    // 同一ラベル+値の重複を除去
-                    const seenHidden = new Set();
-                    const dedupedHidden = hiddenFields.filter(f => {
-                        const k = f.label + '␟' + f.value;
-                        if (seenHidden.has(k)) return false;
-                        seenHidden.add(k);
-                        return true;
-                    });
-
+                    // 索引は「絞り込みに使う少数の項目」だけを持つ。
+                    // property の値・key・description は本文の直接走査が担当するため索引しない。
+                    // これにより 1 ファイルあたりの登録数に上限を設ける必要がなくなり、
+                    // 計測機器メーカーや計測手法による差にも左右されなくなる。
                     return {
                         fileIdx,
                         file,
@@ -10851,13 +11093,11 @@ header .chk input[type="checkbox"] {
                         size: file.size,
                         date: dateObj,
                         dateStr,
-                        sampleName,
                         creator,
                         vendor,
                         owner,
                         instrument,
-                        chainId,
-                        hiddenFields: dedupedHidden,
+                        uuids,
                         relativePath: file._dlRelativePath || '/'
                     };
                 } catch (_) {
@@ -10895,7 +11135,15 @@ header .chk input[type="checkbox"] {
             }
 
             function yieldFrame() {
-                return new Promise(resolve => requestAnimationFrame(resolve));
+                // requestAnimationFrame はタブが非表示・非描画のとき発火しないため、
+                // それだけに頼ると索引作成が途中で止まる（利用者が別タブへ移ると固まる）。
+                // 描画の譲りは rAF、進行の保証は setTimeout の早い方を採用する。
+                return new Promise(resolve => {
+                    let done = false;
+                    const fin = () => { if (!done) { done = true; resolve(); } };
+                    requestAnimationFrame(fin);
+                    setTimeout(fin, 50);
+                });
             }
 
             // Instrument/Creator/Vendor/Owner の4種は同じ形のチェックボックスリストなので
@@ -10955,30 +11203,74 @@ header .chk input[type="checkbox"] {
                 const to = elDateTo.value ? new Date(elDateTo.value + 'T23:59:59') : null;
 
                 dlKeywordTerms = terms; // renderTreeResults()内でのハイライト表示に使用
+                if (!dlScanRunning) dlScanNotice = null;   // 通常の絞り込みに戻ったら注記を消す
 
                 // 1. Filter base array based on requested metadata fields
                 dlFiltered = dlIndex.filter(entry => {
                     entry._matchReasons = [];
+                    if (!passesNonKeyword(entry)) return false;
                     if (terms.length > 0) {
                         const m = matchEntryTerms(entry, terms);
                         if (!m.matched) return false;
                         entry._matchReasons = m.reasons;
                     }
-                    if (from && entry.date && new Date(entry.date) < from) return false;
-                    if (to && entry.date && new Date(entry.date) > to) return false;
-                    if (!passesMetaFilter(entry.instrument, elInstrumentList)) return false;
-                    if (!passesMetaFilter(entry.creator, elCreatorList)) return false;
-                    if (!passesMetaFilter(entry.vendor, elVendorList)) return false;
-                    if (!passesMetaFilter(entry.owner, elOwnerList)) return false;
                     return true;
                 });
 
                 dlChecked.clear();
+                if (!dlScanRunning) scheduleDirectScan(kwRaw);
                 renderTreeResults();
+                if (dlScanTooBig) renderTooBigHint();
             }
 
-            // 複数語を空白区切りで AND 検索する。各語は「表示中のフィールド」
-            // (ファイル名・サンプル名・オペレーター・機器・chainId) にマッチすれば十分だが、
+
+            // キーワード以外の条件（日付と instrument/creator/vendor/owner）。
+            // フィルターとキーワードは AND 条件なので、本文の直接走査もこの判定を通す。
+            // これを共有しないと「フィルターを全解除したのにキーワードでヒットする」ことになる。
+            function passesNonKeyword(entry) {
+                const from = elDateFrom.value ? new Date(elDateFrom.value) : null;
+                const to = elDateTo.value ? new Date(elDateTo.value + 'T23:59:59') : null;
+                if (from && entry.date && new Date(entry.date) < from) return false;
+                if (to && entry.date && new Date(entry.date) > to) return false;
+                if (!passesMetaFilter(entry.instrument, elInstrumentList)) return false;
+                if (!passesMetaFilter(entry.creator, elCreatorList)) return false;
+                if (!passesMetaFilter(entry.vendor, elVendorList)) return false;
+                if (!passesMetaFilter(entry.owner, elOwnerList)) return false;
+                return true;
+            }
+
+            // 索引を作れなかったファイル（サイズ超過・破損）は instrument 等の値が分からない。
+            // 既定（全選択）のときはフィルタが効いていないので走査対象に含め、
+            // 一部だけ選ばれているときは「値が一致すると言えない」ため対象から外す。
+            function facetsUntouched() {
+                return [elInstrumentList, elCreatorList, elVendorList, elOwnerList].every(list => {
+                    const boxes = [...list.querySelectorAll('input[data-value]')];
+                    return boxes.length === 0 || boxes.every(c => c.checked);
+                });
+            }
+
+            // 直接走査の対象になるファイル。フィルターを通ったものだけに絞る。
+            function dlScanCandidates() {
+                const ok = new Set();
+                dlIndex.forEach(e => { if (passesNonKeyword(e)) ok.add(e.displayName); });
+                const untouched = facetsUntouched();
+                return dlAllFiles.filter(f => ok.has(f.name)
+                    || (untouched && !dlIndex.some(e => e.displayName === f.name)));
+            }
+            // 自動走査を見送った規模のときは、取りこぼしがあり得ることを伝えてボタンを出す
+            function renderTooBigHint() {
+                const bar = document.createElement('div');
+                bar.style.cssText = 'margin:0.3rem 0.4rem; padding:6px 8px; font-size:11px;'
+                    + 'border:1px dashed #b45309; color:#b45309; border-radius:6px;';
+                bar.innerHTML = `⚠ 索引だけで絞り込んでいます。索引には 1 ファイルあたりの上限があるため`
+                    + `取りこぼしがあり得ます。`
+                    + `<button class="dl-hdr-btn dl-hdr-btn-primary" style="margin-left:8px;"`
+                    + ` onclick="dlDirectScan(true)">🔎 本文も確認（${dlScanTooBig.mb.toFixed(0)} MB）</button>`;
+                elResultsList.prepend(bar);
+            }
+
+            // 複数語を空白区切りで AND 検索する。各語は索引が持つフィールド
+            // (ファイル名・パス・装置・作成者・ベンダー・所有者・UUID) と照合する。
             // そこで見つからない場合は「隠れたフィールド」(uuid / property key / description等の
             // タグ本文) も探す。文字数による下限は設けない — MaiMLではuuidの一致が
             // 「同じ試料を複数機器で計測した」ことを表す規格上の重要な意味を持つため、
@@ -10987,16 +11279,21 @@ header .chk input[type="checkbox"] {
             // reasons に積んで返し、「なぜこのファイルがヒットしたか」(例: 🔎 uuid: dc65e756-…)
             // をカード上のチップで明示するため、無関係な偶然一致が出ても由来が一目でわかる。
             function matchEntryTerms(entry, terms) {
+                // 索引で照合するのはファイル名・パスと、装置・作成者などの少数の項目、そして UUID。
+                // それ以外の語（property の key/value、description 等）は本文の直接走査が担当する。
                 const visibleHaystack = [
-                    entry.displayName, entry.sampleName, entry.creator, entry.vendor, entry.owner, entry.instrument, entry.chainId
+                    entry.displayName, entry.relativePath,
+                    entry.creator, entry.vendor, entry.owner, entry.instrument
                 ].filter(Boolean).join(' ').toLowerCase();
 
                 const reasons = [];
                 for (const term of terms) {
+                    if (/^[0-9a-f-]{4,}$/i.test(term)) {
+                        const u = (entry.uuids || []).find(v => v.includes(term));
+                        if (u) { reasons.push({ label: 'uuid', value: u }); continue; }
+                    }
                     if (visibleHaystack.includes(term)) continue;
-                    const hit = (entry.hiddenFields || []).find(f => f.value.toLowerCase().includes(term));
-                    if (!hit) return { matched: false, reasons: [] };
-                    reasons.push(hit);
+                    return { matched: false, reasons: [] };
                 }
 
                 const seen = new Set();
@@ -11052,10 +11349,13 @@ header .chk input[type="checkbox"] {
                 }
 
                 if (dlFiltered.length === 0) {
+                    const waiting = dlScanPending || dlScanRunning;
                     elResultsList.innerHTML = `
                     <div class="dl-empty-state">
                         <div class="dl-empty-icon">🔍</div>
-                        <div>No files match the criteria</div>
+                        <div>${waiting ? '索引には見つかりませんでした' : 'No files match the criteria'}</div>
+                        ${waiting ? `<div style="font-size:11px; opacity:0.8; margin-top:6px;">
+                            ファイル本文を確認しています…</div>` : ''}
                     </div>`;
                     return;
                 }
@@ -11158,7 +11458,6 @@ header .chk input[type="checkbox"] {
                         const sizeLabel = formatSize(entry.size);
 
                         const badges = [];
-                        if (entry.chainId) badges.push(`<span class="dl-badge chain">⛓ chain</span>`);
                         if (entry.instrument) badges.push(`<span class="dl-badge instrument">${esc(entry.instrument)}</span>`);
                         if (entry.vendor) badges.push(`<span class="dl-badge vendor">🏭 ${esc(entry.vendor)}</span>`);
                         if (entry.owner) badges.push(`<span class="dl-badge owner">👤 ${esc(entry.owner)}</span>`);
@@ -11173,7 +11472,7 @@ header .chk input[type="checkbox"] {
 
                         const terms = dlKeywordTerms;
                         const nameHtml = highlightTerms(esc(entry.displayName), terms);
-                        const sampleHtml = entry.sampleName ? ' · ' + highlightTerms(esc(entry.sampleName), terms) : '';
+                        const sampleHtml = '';
                         const creatorHtml = entry.creator ? ' · ' + highlightTerms(esc(entry.creator), terms) : '';
 
                         card.innerHTML = `
