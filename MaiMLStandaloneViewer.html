@@ -59,6 +59,7 @@
             --btn-ink: #475569;
             --btn-border: #cbd5e1;
             --btn-hover-bg: #e2e8f0;
+            --flag-on: #10b981;
         }
 
         :root[data-theme="dark"] {
@@ -80,6 +81,7 @@
             --btn-ink: #cbd5e1;
             --btn-border: #334155;
             --btn-hover-bg: #334155;
+            --flag-on: #34d399;
         }
 
         * {
@@ -275,6 +277,29 @@ header#toolbar {
             cursor: ns-resize;
             background: #ccc;
             flex-shrink: 0;
+        }
+
+        /* パネルのリサイズ中は、ドラッグがテキスト選択にならないようにする */
+        #horizontalSeparator,
+        #verticalSeparator {
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body.resizing,
+        body.resizing * {
+            user-select: none !important;
+            -webkit-user-select: none !important;
+        }
+
+        body.resizing-h,
+        body.resizing-h * {
+            cursor: ns-resize !important;
+        }
+
+        body.resizing-v,
+        body.resizing-v * {
+            cursor: ew-resize !important;
         }
 
         #bottomSection {
@@ -1335,17 +1360,24 @@ header#toolbar {
             border-top: 1px solid var(--border);
         }
 
-        /* ── リンク表示制御ツールボックス ── */
-        #linkVisToolbox {
+        /* ── キャンバス・ツールバー（Link Visibility / View / Image） ── */
+        #canvasTools {
             position: absolute;
             top: 8px;
             left: 8px;
             z-index: 20;
+            display: flex;
+            align-items: flex-start;
+            gap: 6px;
             font-size: 12px;
             user-select: none;
         }
 
-        #linkVisToolbox summary {
+        .ctool {
+            position: relative;
+        }
+
+        .ctool>summary {
             display: flex;
             align-items: center;
             gap: 4px;
@@ -1363,41 +1395,117 @@ header#toolbar {
             white-space: nowrap;
         }
 
-        #linkVisToolbox summary::-webkit-details-marker {
+        .ctool>summary::-webkit-details-marker {
             display: none;
         }
 
-        #linkVisToolbox[open] summary {
+        .ctool[open]>summary {
             border-radius: 8px 8px 0 0;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
         }
 
-        #linkVisToolbox summary:hover {
+        .ctool>summary:hover {
             background: var(--btn-hover-bg);
         }
 
-        #linkVisToolbox summary .toggle-arrow {
+        .ctool>summary .toggle-arrow {
             display: inline-block;
             transition: transform 0.2s;
             font-size: 10px;
             color: var(--muted);
         }
 
-        #linkVisToolbox[open] summary .toggle-arrow {
+        .ctool[open]>summary .toggle-arrow {
             transform: rotate(90deg);
         }
 
-        #linkVisToolboxBody {
+        /* 「全ての関係線が表示されている」ことを示すグリーンフラグ。
+           常時表示し、点灯(●)=全表示 / 消灯(○)=非表示の線あり を示す。 */
+        .ctool-badge {
+            display: inline-block;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            border: 1.5px solid var(--flag-on);
+            background: var(--flag-on);
+            flex-shrink: 0;
+            transition: background 0.15s, border-color 0.15s;
+        }
+
+        .ctool-badge.off {
+            background: transparent;
+            border-color: var(--muted);
+        }
+
+        .ctool-body {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            margin-top: -1px;
             background: var(--surface);
             border: 1px solid var(--border);
-            border-top: none;
-            border-radius: 0 0 8px 8px;
+            border-radius: 0 8px 8px 8px;
             padding: 6px 10px 8px;
             display: flex;
             flex-direction: column;
             gap: 4px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
             min-width: 170px;
+        }
+
+        /* パネル内の見出し・アクション・オプション行 */
+        .ct-heading {
+            font-size: 9px;
+            font-weight: 700;
+            color: var(--muted);
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            margin-top: 2px;
+        }
+
+        .ctool-body .ct-action {
+            width: 100%;
+            text-align: left;
+            font-size: 11px;
+            padding: .3rem .5rem;
+            white-space: nowrap;
+        }
+
+        .ct-optrow {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            font-size: 11px;
+            color: var(--ink);
+        }
+
+        .ct-optrow select {
+            font-size: 11px;
+            padding: 1px 4px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background: var(--bg);
+            color: var(--ink);
+        }
+
+        #viewToolboxBody .chk {
+            font-size: 11px;
+            gap: 6px;
+        }
+
+        #viewToolboxBody .chk input[type="checkbox"] {
+            width: 13px;
+            height: 13px;
+            margin: 0 4px 0 0;
+        }
+
+        #canvasTools .ct-hint {
+            font-size: 10px;
+            color: var(--muted);
+            line-height: 1.4;
+            max-width: 210px;
+            white-space: normal;
         }
 
         .lv-row {
@@ -1430,7 +1538,7 @@ header#toolbar {
             color: var(--ink);
         }
 
-        #linkVisToolboxBody .lv-divider {
+        .ctool-body .lv-divider {
             border: none;
             border-top: 1px solid var(--border);
             margin: 2px 0;
@@ -2081,19 +2189,9 @@ header .chk input[type="checkbox"] {
         <button class="btn" id="openFileBtn">📂Upload Files…</button>
         <button class="btn" id="openFolderBtn" title="Connect to Data Lake (Chrome/Edge)" style="display:none;">🛢️ Data Lake</button>
         <div class="toolbar-sep"></div>
-        <button class="btn" id="dagreBtn">Dagre Layout</button>
-        <button class="btn" id="auto">Auto Layout</button>
-        <button class="btn" id="reset">Reset Position</button>
-        <label class="chk"><input checked="" id="dragMode" type="checkbox" /> Drag Edit</label>
-        <label class="chk"><input id="showGrid" type="checkbox" /> Show Grid</label>
-        <label class="chk"><input id="snapGrid" type="checkbox" /> Snap to Grid</label>
-        <span id="gridSizeControl"
-            style="display:inline-flex;align-items:center;gap:3px;font-size:13px;opacity:0.4;pointer-events:none;">
-            Grid:
-            <button id="gridSizeDec" class="btn" style="padding:1px 7px;min-width:unset;">−</button>
-            <span id="gridSizeVal" style="min-width:28px;text-align:center;font-variant-numeric:tabular-nums;">20</span>
-            <button id="gridSizeInc" class="btn" style="padding:1px 7px;min-width:unset;">＋</button>
-        </span>
+        <button class="btn" id="dagreBtn" title="Dagre Layout (hierarchical)">⌗ Dagre</button>
+        <button class="btn" id="auto" title="Auto Layout (force-directed)">✧ Auto</button>
+        <button class="btn" id="reset" title="Reset node positions">⟲ Reset</button>
         <div class="toolbar-sep"></div>
         <div class="spacer"></div>
         <button class="btn" id="themeBtn" title="Light/Dark Toggle">🌙 Theme</button>
@@ -2104,46 +2202,112 @@ header .chk input[type="checkbox"] {
             <div id="stageWrap">
                 <svg id="stage"></svg>
 
+                <!-- キャンバス・ツールバー（表示設定 + 画像出力） -->
+                <div id="canvasTools">
+
                 <!-- リンク表示制御ツールボックス -->
-                <details id="linkVisToolbox">
+                <details class="ctool" id="linkVisToolbox">
                     <summary>
                         <span class="toggle-arrow">▶</span>
-                        🔗 Link Visibility
+                        🔗 Link
+                        <span class="ctool-badge" id="linkVisBadge" title="All link types are visible"></span>
                     </summary>
-                    <div id="linkVisToolboxBody">
-                        <label class="lv-row" title="templateRef線の表示/非表示">
+                    <div class="ctool-body" id="linkVisToolboxBody">
+                        <label class="lv-row" title="Show / hide templateRef links">
                             <input type="checkbox" id="lvTemplateRef" checked>
                             <span class="lv-swatch dash" style="color:#f6d65b;"></span>
                             <span class="lv-label">templateRef</span>
                         </label>
-                        <label class="lv-row" title="instanceRef線の表示/非表示">
+                        <label class="lv-row" title="Show / hide instanceRef links">
                             <input type="checkbox" id="lvInstanceRef" checked>
                             <span class="lv-swatch dash" style="color:#3ddc97;"></span>
                             <span class="lv-label">instanceRef</span>
                         </label>
-                        <label class="lv-row" title="chain線の表示/非表示">
+                        <label class="lv-row" title="Show / hide chain links">
                             <input type="checkbox" id="lvChain" checked>
                             <span class="lv-swatch dash" style="color:#f97316;"></span>
                             <span class="lv-label">chain</span>
                         </label>
-                        <label class="lv-row" title="parent線の表示/非表示">
+                        <label class="lv-row" title="Show / hide parent links">
                             <input type="checkbox" id="lvParent" checked>
                             <span class="lv-swatch dash" style="color:#c084fc;"></span>
                             <span class="lv-label">parent</span>
                         </label>
                         <hr class="lv-divider">
-                        <label class="lv-row" title="same uuid:Template線の表示/非表示">
+                        <label class="lv-row" title="Show / hide same uuid:Template links">
                             <input type="checkbox" id="lvSameUuidTemplate" checked>
                             <span class="lv-swatch dash" style="color:#818cf8;"></span>
                             <span class="lv-label">same uuid : Template</span>
                         </label>
-                        <label class="lv-row" title="same uuid:Instance線の表示/非表示">
+                        <label class="lv-row" title="Show / hide same uuid:Instance links">
                             <input type="checkbox" id="lvSameUuidInstance" checked>
                             <span class="lv-swatch dash" style="color:#a78bfa;"></span>
                             <span class="lv-label">same uuid : Instance</span>
                         </label>
                     </div>
                 </details>
+
+                <!-- キャンバス表示設定（旧ヘッダのトグル群を集約） -->
+                <details class="ctool" id="viewToolbox">
+                    <summary>
+                        <span class="toggle-arrow">▶</span>
+                        ⚙ View
+                    </summary>
+                    <div class="ctool-body" id="viewToolboxBody">
+                        <label class="chk" title="Allow nodes to be repositioned by dragging"><input checked=""
+                                id="dragMode" type="checkbox" /> Drag Edit</label>
+                        <label class="chk" title="Show grid lines on the canvas"><input id="showGrid"
+                                type="checkbox" /> Show Grid</label>
+                        <label class="chk" title="Snap nodes to the grid while dragging"><input id="snapGrid"
+                                type="checkbox" /> Snap to Grid</label>
+                        <span id="gridSizeControl"
+                            style="display:inline-flex;align-items:center;gap:3px;font-size:11px;opacity:0.4;pointer-events:none;">
+                            Grid:
+                            <button id="gridSizeDec" class="btn" style="padding:1px 7px;min-width:unset;">−</button>
+                            <span id="gridSizeVal"
+                                style="min-width:28px;text-align:center;font-variant-numeric:tabular-nums;">20</span>
+                            <button id="gridSizeInc" class="btn" style="padding:1px 7px;min-width:unset;">＋</button>
+                        </span>
+                    </div>
+                </details>
+
+                <!-- ペトリネット図の画像出力 -->
+                <details class="ctool" id="imageToolbox">
+                    <summary title="Export the Petri net diagram as an image">
+                        <span class="toggle-arrow">▶</span>
+                        📷 Image
+                    </summary>
+                    <div class="ctool-body" id="imageToolboxBody" style="min-width:206px;">
+                        <button class="btn ct-action" id="imgCopyBtn"
+                            title="Copy the diagram to the clipboard as PNG">📋 Copy to Clipboard</button>
+                        <button class="btn ct-action" id="imgSavePngBtn" title="Save the diagram as a PNG file">💾 Save as PNG</button>
+                        <button class="btn ct-action" id="imgSaveSvgBtn"
+                            title="Save the diagram as a vector SVG file">💾 Save as SVG (vector)</button>
+                        <hr class="lv-divider">
+                        <div class="ct-heading">Options</div>
+                        <label class="ct-optrow" title="Output scale for PNG">Scale
+                            <select id="imgScaleSel">
+                                <option value="1">1x</option>
+                                <option value="2" selected>2x</option>
+                                <option value="3">3x</option>
+                                <option value="4">4x</option>
+                            </select>
+                        </label>
+                        <label class="ct-optrow" title="Background of the exported image">Background
+                            <select id="imgBgSel">
+                                <option value="theme" selected>Theme</option>
+                                <option value="white">White</option>
+                                <option value="transparent">Transparent</option>
+                            </select>
+                        </label>
+                        <label class="ct-optrow" title="Include grid lines in the exported image">Include grid
+                            <input type="checkbox" id="imgIncludeGrid">
+                        </label>
+                        <div class="ct-hint">Exports the whole diagram, independent of the current zoom / pan.</div>
+                    </div>
+                </details>
+
+                </div><!-- /#canvasTools -->
             </div>
             <div id="verticalSeparator"></div>
             <div id="metadataPanel">
@@ -2401,14 +2565,18 @@ header .chk input[type="checkbox"] {
                         <ul style="padding-left: 1.5rem;">
                             <li><strong>移動 (Pan):</strong> 何もないところをドラッグ。</li>
                             <li><strong>拡大縮小 (Zoom):</strong> マウスホイール。</li>
-                            <li><strong>ノード移動:</strong> 各ノード（丸や四角）をドラッグして配置を調整できます。<br><span
+                            <li><strong>ノード移動:</strong> 各ノード（丸や四角）をドラッグして配置を調整できます。<br>グラフエリア左上の <span
+                                    style="background: var(--chip); color: var(--chip-ink); padding: 0.1rem 0.3rem; border-radius: 4px; font-family: monospace;">⚙
+                                    View</span> にある <span
                                     style="background: var(--chip); color: var(--chip-ink); padding: 0.1rem 0.3rem; border-radius: 4px; font-family: monospace;">Drag
                                     Edit</span> チェックボックスで有効/無効を切り替えます。</li>
-                            <li><strong>レイアウト自動調整:</strong> <span
-                                    style="background: var(--chip); color: var(--chip-ink); padding: 0.1rem 0.3rem; border-radius: 4px; font-family: monospace;">Auto
-                                    Layout</span> (力学モデル) または <span
-                                    style="background: var(--chip); color: var(--chip-ink); padding: 0.1rem 0.3rem; border-radius: 4px; font-family: monospace;">Dagre
-                                    Layout</span> (階層型) で配置を整理できます。</li>
+                            <li><strong>レイアウト自動調整:</strong> ツールバーの <span
+                                    style="background: var(--chip); color: var(--chip-ink); padding: 0.1rem 0.3rem; border-radius: 4px; font-family: monospace;">✧
+                                    Auto</span> (力学モデル) または <span
+                                    style="background: var(--chip); color: var(--chip-ink); padding: 0.1rem 0.3rem; border-radius: 4px; font-family: monospace;">⌗
+                                    Dagre</span> (階層型) で配置を整理できます。<span
+                                    style="background: var(--chip); color: var(--chip-ink); padding: 0.1rem 0.3rem; border-radius: 4px; font-family: monospace;">⟲
+                                    Reset</span> で手動配置を破棄して初期状態に戻します。</li>
                         </ul>
                     </div>
 
@@ -2436,18 +2604,60 @@ header .chk input[type="checkbox"] {
                                     (薄紫の破線):</strong> 同一UUIDを持つInstanceノード同士の対応関係です。</li>
                         </ul>
 
-                        <h3 style="font-size: 1.1rem; color: var(--accent); margin: 1.2rem 0 0.5rem;">🔗 Link Visibility
-                            ツールボックス</h3>
-                        <p>グラフエリアの左上にある <span
+                        <h3 style="font-size: 1.1rem; color: var(--accent); margin: 1.2rem 0 0.5rem;">🎛️ キャンバス・ツールバー
+                        </h3>
+                        <p>グラフエリアの左上に <span
                                 style="background: var(--chip); color: var(--chip-ink); padding: 0.1rem 0.3rem; border-radius: 4px; font-family: monospace;">🔗
-                                Link Visibility</span> ボタンをクリックするとツールボックスが展開されます。</p>
+                                Link</span> / <span
+                                style="background: var(--chip); color: var(--chip-ink); padding: 0.1rem 0.3rem; border-radius: 4px; font-family: monospace;">⚙
+                                View</span> / <span
+                                style="background: var(--chip); color: var(--chip-ink); padding: 0.1rem 0.3rem; border-radius: 4px; font-family: monospace;">📷
+                                Image</span> の3つのボタンがあり、クリックするとパネルが開きます（同時に開くのは1つ、グラフをクリックすると閉じます）。設定内容はブラウザに保存され、次回起動時に復元されます。</p>
+
+                        <h4 style="font-size: 1rem; margin: 0.9rem 0 0.3rem;">🔗 Link — 関係線の表示制御</h4>
                         <ul style="padding-left: 1.5rem;">
                             <li>5種類の関係線（templateRef・instanceRef・chain・same uuid:Template・same
                                 uuid:Instance）をチェックボックスで個別に表示/非表示切り替えできます。</li>
                             <li>関係線が重なって見づらい場合にOFFにすることで、必要な線だけを表示できます。</li>
                             <li>チェックを外すと、対応する線とラベルが即座に非表示になります。</li>
-                            <li>ツールボックスを使わない場合は折り畳んでおけばグラフの表示を妨げません。</li>
+                            <li><strong>グリーンフラグ:</strong> <span
+                                    style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--flag-on);border:1.5px solid var(--flag-on);"></span>
+                                ボタンのラベル横のドットが<strong>点灯（緑の●）</strong>なら全ての関係線が表示中、<strong>消灯（中空の○）</strong>なら非表示にしている関係線があることを示します。<br>
+                                パネルを折り畳んでいても分かるため、「線を隠したまま忘れて、その関係が存在しないと誤読する」ことを防げます。ドットにマウスを乗せると、隠している種類の数が表示されます。
+                            </li>
                         </ul>
+
+                        <h4 style="font-size: 1rem; margin: 0.9rem 0 0.3rem;">⚙ View — キャンバスの表示設定</h4>
+                        <ul style="padding-left: 1.5rem;">
+                            <li><strong>Drag Edit:</strong> ノードのドラッグによる配置変更を許可します。</li>
+                            <li><strong>Show Grid:</strong> グリッド線を表示します。<strong>Grid</strong> の ＋ / − で間隔（10〜100px）を変更できます。
+                            </li>
+                            <li><strong>Snap to Grid:</strong> ドラッグ時にノードをグリッドへ吸着させます。</li>
+                        </ul>
+
+                        <h3 style="font-size: 1.1rem; color: var(--accent); margin: 1.2rem 0 0.5rem;">📷 Image —
+                            ペトリネット図の画像出力</h3>
+                        <p>表示中のペトリネット図を画像として出力します。<strong>現在のズーム/パン位置に関わらず、常にグラフ全体が収まる範囲</strong>で出力されます。</p>
+                        <ul style="padding-left: 1.5rem;">
+                            <li><strong>Copy to Clipboard:</strong> PNG画像としてクリップボードにコピーします。Word や PowerPoint
+                                にそのまま貼り付けられます。</li>
+                            <li><strong>Save as PNG:</strong> PNG画像としてファイルに保存します。</li>
+                            <li><strong>Save as SVG (vector):</strong>
+                                ベクター形式で保存します。拡大しても劣化しないため、論文や資料への図版として適しています。</li>
+                        </ul>
+                        <p style="margin-top:0.4rem;"><strong>Options:</strong></p>
+                        <ul style="padding-left: 1.5rem;">
+                            <li><strong>Scale:</strong> PNGの出力倍率（1x〜4x、既定 2x）。数値が大きいほど高精細になります。</li>
+                            <li><strong>Background:</strong> 背景色。<code>Theme</code>（現在のテーマ色・既定）/ <code>White</code>（白）/
+                                <code>Transparent</code>（透過）から選べます。<br>ダークテーマでは文字が白いため、透過を選ぶと白い資料へ貼ったときに文字が見えなくなる点にご注意ください。
+                            </li>
+                            <li><strong>Include grid:</strong> グリッド線を画像に含めます。</li>
+                        </ul>
+                        <p style="margin-top:0.4rem; opacity:0.8; font-size:0.92em;">
+                            ※ クリップボードへの画像コピーは Chrome / Edge
+                            で動作します。ブラウザが対応していない場合や失敗した場合は、自動的にPNGファイルの保存に切り替わります。<br>
+                            ※ 画像内のフォントは環境標準のフォントに置き換えられるため、画面表示とわずかに異なる場合があります。
+                        </p>
 
                         <h3 style="font-size: 1.1rem; color: var(--accent); margin: 1.2rem 0 0.5rem;">右上パネル: Metadata
                             Panel</h3>
@@ -2752,14 +2962,18 @@ header .chk input[type="checkbox"] {
                         <ul style="padding-left: 1.5rem;">
                             <li><strong>Pan:</strong> Drag on the empty space.</li>
                             <li><strong>Zoom:</strong> Use the mouse wheel.</li>
-                            <li><strong>Move Nodes:</strong> Drag individual nodes. Enabled via <span
+                            <li><strong>Move Nodes:</strong> Drag individual nodes. Enabled via the <span
                                     style="background: var(--chip); color: var(--chip-ink); padding: 0.1rem 0.3rem; border-radius: 4px; font-family: monospace;">Drag
-                                    Edit</span> checkbox.</li>
-                            <li><strong>Auto Layout:</strong> Organize layout using <span
-                                    style="background: var(--chip); color: var(--chip-ink); padding: 0.1rem 0.3rem; border-radius: 4px; font-family: monospace;">Auto
-                                    Layout</span> or <span
-                                    style="background: var(--chip); color: var(--chip-ink); padding: 0.1rem 0.3rem; border-radius: 4px; font-family: monospace;">Dagre
-                                    Layout</span>.</li>
+                                    Edit</span> checkbox inside <span
+                                    style="background: var(--chip); color: var(--chip-ink); padding: 0.1rem 0.3rem; border-radius: 4px; font-family: monospace;">⚙
+                                    View</span> in the top-left corner of the graph area.</li>
+                            <li><strong>Auto Layout:</strong> Organize the layout with <span
+                                    style="background: var(--chip); color: var(--chip-ink); padding: 0.1rem 0.3rem; border-radius: 4px; font-family: monospace;">✧
+                                    Auto</span> (force-directed) or <span
+                                    style="background: var(--chip); color: var(--chip-ink); padding: 0.1rem 0.3rem; border-radius: 4px; font-family: monospace;">⌗
+                                    Dagre</span> (hierarchical) in the toolbar. <span
+                                    style="background: var(--chip); color: var(--chip-ink); padding: 0.1rem 0.3rem; border-radius: 4px; font-family: monospace;">⟲
+                                    Reset</span> discards manual placement and returns to the initial layout.</li>
                         </ul>
                     </div>
 
@@ -2789,12 +3003,19 @@ header .chk input[type="checkbox"] {
                                 files.</li>
                         </ul>
 
-                        <h3 style="font-size: 1.1rem; color: var(--accent); margin: 1.2rem 0 0.5rem;">🔗 Link Visibility
-                            Toolbox</h3>
-                        <p>Click the <span
+                        <h3 style="font-size: 1.1rem; color: var(--accent); margin: 1.2rem 0 0.5rem;">🎛️ Canvas Toolbar
+                        </h3>
+                        <p>The top-left corner of the graph area holds three buttons — <span
                                 style="background: var(--chip); color: var(--chip-ink); padding: 0.1rem 0.3rem; border-radius: 4px; font-family: monospace;">🔗
-                                Link Visibility</span> button in the top-left corner of the graph area to expand the
-                            toolbox.</p>
+                                Link</span>, <span
+                                style="background: var(--chip); color: var(--chip-ink); padding: 0.1rem 0.3rem; border-radius: 4px; font-family: monospace;">⚙
+                                View</span> and <span
+                                style="background: var(--chip); color: var(--chip-ink); padding: 0.1rem 0.3rem; border-radius: 4px; font-family: monospace;">📷
+                                Image</span> — each opening a small panel. Only one panel is open at a time, and clicking
+                            the graph closes it. Your settings are stored in the browser and restored on the next start.
+                        </p>
+
+                        <h4 style="font-size: 1rem; margin: 0.9rem 0 0.3rem;">🔗 Link — link visibility</h4>
                         <ul style="padding-left: 1.5rem;">
                             <li>Toggle the visibility of each of the five link types individually:
                                 <strong>templateRef</strong>, <strong>instanceRef</strong>, <strong>chain</strong>,
@@ -2803,8 +3024,52 @@ header .chk input[type="checkbox"] {
                             <li>When links overlap and make the graph hard to read, hide unnecessary types to focus on
                                 the ones you need.</li>
                             <li>Unchecking a link type immediately hides both its lines and labels.</li>
-                            <li>Collapse the toolbox when not in use to keep the graph area unobstructed.</li>
+                            <li><strong>Green flag:</strong> <span
+                                    style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--flag-on);border:1.5px solid var(--flag-on);"></span>
+                                The dot next to the button label is <strong>filled (green ●)</strong> while every link
+                                type is visible, and <strong>hollow (○)</strong> when one or more types are hidden.<br>
+                                It stays readable while the panel is collapsed, so you will not mistake "I hid these
+                                links" for "this file has no such relationships". Hover the dot to see how many types
+                                are hidden.
+                            </li>
                         </ul>
+
+                        <h4 style="font-size: 1rem; margin: 0.9rem 0 0.3rem;">⚙ View — canvas display settings</h4>
+                        <ul style="padding-left: 1.5rem;">
+                            <li><strong>Drag Edit:</strong> Allow nodes to be repositioned by dragging.</li>
+                            <li><strong>Show Grid:</strong> Display grid lines. Use <strong>Grid</strong> ＋ / − to
+                                change the spacing (10–100 px).</li>
+                            <li><strong>Snap to Grid:</strong> Snap nodes to the grid while dragging.</li>
+                        </ul>
+
+                        <h3 style="font-size: 1.1rem; color: var(--accent); margin: 1.2rem 0 0.5rem;">📷 Image — export
+                            the Petri net diagram</h3>
+                        <p>Exports the Petri net diagram currently on screen. The export <strong>always covers the whole
+                                diagram</strong>, regardless of the current zoom or pan position.</p>
+                        <ul style="padding-left: 1.5rem;">
+                            <li><strong>Copy to Clipboard:</strong> Copies the diagram as a PNG image, ready to paste
+                                into Word, PowerPoint and similar applications.</li>
+                            <li><strong>Save as PNG:</strong> Saves the diagram as a PNG file.</li>
+                            <li><strong>Save as SVG (vector):</strong> Saves the diagram in vector format, which stays
+                                sharp at any size — suitable for papers and presentations.</li>
+                        </ul>
+                        <p style="margin-top:0.4rem;"><strong>Options:</strong></p>
+                        <ul style="padding-left: 1.5rem;">
+                            <li><strong>Scale:</strong> Output scale for PNG (1x–4x, default 2x). Higher values produce
+                                a higher-resolution image.</li>
+                            <li><strong>Background:</strong> <code>Theme</code> (current theme colour, default),
+                                <code>White</code> or <code>Transparent</code>.<br>Note that labels are white in the
+                                dark theme, so a transparent export may become invisible when pasted onto a white
+                                document.
+                            </li>
+                            <li><strong>Include grid:</strong> Include grid lines in the exported image.</li>
+                        </ul>
+                        <p style="margin-top:0.4rem; opacity:0.8; font-size:0.92em;">
+                            Note: copying an image to the clipboard works in Chrome / Edge. If the browser does not
+                            support it or the copy fails, the tool automatically falls back to saving a PNG file.<br>
+                            Note: fonts in the exported image are replaced with standard system fonts, so the result may
+                            differ slightly from what is shown on screen.
+                        </p>
 
                         <h3 style="font-size: 1.1rem; color: var(--accent); margin: 1.2rem 0 0.5rem;">Top-Right Panel:
                             Metadata Panel</h3>
@@ -3581,7 +3846,12 @@ pkijs/build/index.es.js:
                 const separator = document.getElementById('horizontalSeparator');
                 let isResizing = false;
 
-                separator.addEventListener('mousedown', () => { isResizing = true; });
+                separator.addEventListener('mousedown', (e) => {
+                    isResizing = true;
+                    // 既定のドラッグ選択が始まらないようにする（パネルが選択状態になるのを防ぐ）
+                    e.preventDefault();
+                    document.body.classList.add('resizing', 'resizing-h');
+                });
 
                 document.addEventListener('mousemove', (e) => {
                     if (!isResizing) return;
@@ -3603,14 +3873,27 @@ pkijs/build/index.es.js:
                     topSection.style.flex = 'none';
                 });
 
-                document.addEventListener('mouseup', () => { isResizing = false; });
+                const stopResizing = () => {
+                    if (!isResizing) return;
+                    isResizing = false;
+                    document.body.classList.remove('resizing', 'resizing-h');
+                    // 念のため、リサイズ中に生じた選択範囲を解除する
+                    try { window.getSelection()?.removeAllRanges(); } catch (e) { }
+                };
+                document.addEventListener('mouseup', stopResizing);
+                window.addEventListener('blur', stopResizing);
             }
 
             function setupVerticalResizer() {
                 const separator = document.getElementById('verticalSeparator');
                 let isResizing = false;
 
-                separator.addEventListener('mousedown', () => { isResizing = true; });
+                separator.addEventListener('mousedown', (e) => {
+                    isResizing = true;
+                    // 既定のドラッグ選択が始まらないようにする（パネルが選択状態になるのを防ぐ）
+                    e.preventDefault();
+                    document.body.classList.add('resizing', 'resizing-v');
+                });
 
                 document.addEventListener('mousemove', (e) => {
                     if (!isResizing) return;
@@ -3632,7 +3915,15 @@ pkijs/build/index.es.js:
                     metadataPanel.style.width = `${totalWidth - leftWidth - separator.offsetWidth}px`;
                 });
 
-                document.addEventListener('mouseup', () => { isResizing = false; });
+                const stopResizing = () => {
+                    if (!isResizing) return;
+                    isResizing = false;
+                    document.body.classList.remove('resizing', 'resizing-v');
+                    // 念のため、リサイズ中に生じた選択範囲を解除する
+                    try { window.getSelection()?.removeAllRanges(); } catch (e) { }
+                };
+                document.addEventListener('mouseup', stopResizing);
+                window.addEventListener('blur', stopResizing);
             }
 
             // Seg control
@@ -3686,6 +3977,447 @@ pkijs/build/index.es.js:
             });
             document.getElementById('gridSizeInc').addEventListener('click', () => {
                 applyGridSize(Math.min(100, GRID_SIZE + 5));
+            });
+
+            // ============================================================
+            // CANVAS TOOLS（キャンバス上のツールバー：開閉制御・状態表示・永続化）
+            // ============================================================
+            const CANVAS_TOOL_PREFS_KEY = 'maiml-viewer:canvasTools';
+
+            // 復元中フラグ。復元時に dispatch する change イベントで保存処理が走り、
+            // 未復元の項目（既定値のまま）で設定を上書きしてしまうのを防ぐ。
+            let restoringCanvasToolPrefs = false;
+
+            /**
+             * 🔗 Link のグリーンフラグを更新する。
+             * 点灯(●) = 全ての関係線を表示中 / 消灯(○) = 非表示にしている関係線がある。
+             * 隠したまま忘れて「その関係が存在しない」と誤読するのを防ぐための指標。
+             */
+            function updateCanvasToolBadges() {
+                const lvIds = ['lvTemplateRef', 'lvInstanceRef', 'lvChain', 'lvParent',
+                    'lvSameUuidTemplate', 'lvSameUuidInstance'];
+                const hidden = lvIds.filter(id => {
+                    const el = document.getElementById(id);
+                    return el && !el.checked;
+                }).length;
+                const badge = document.getElementById('linkVisBadge');
+                if (!badge) return;
+                badge.classList.toggle('off', hidden > 0);
+                badge.title = hidden > 0
+                    ? `${hidden} link type${hidden > 1 ? 's are' : ' is'} hidden`
+                    : 'All link types are visible';
+            }
+
+            /** 表示設定を localStorage へ保存 */
+            function saveCanvasToolPrefs() {
+                if (restoringCanvasToolPrefs) return;   // 復元途中の中間状態は保存しない
+                try {
+                    const prefs = { grid: GRID_SIZE };
+                    ['dragMode', 'showGrid', 'snapGrid', 'lvTemplateRef', 'lvInstanceRef', 'lvChain',
+                        'lvParent', 'lvSameUuidTemplate', 'lvSameUuidInstance', 'imgIncludeGrid'].forEach(id => {
+                            const el = document.getElementById(id);
+                            if (el) prefs[id] = el.checked;
+                        });
+                    ['imgScaleSel', 'imgBgSel'].forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) prefs[id] = el.value;
+                    });
+                    localStorage.setItem(CANVAS_TOOL_PREFS_KEY, JSON.stringify(prefs));
+                } catch (e) { /* 保存できなくても動作に影響させない */ }
+            }
+
+            /** 保存済みの表示設定を復元（既存の change ハンドラを再利用するため dispatch する） */
+            function restoreCanvasToolPrefs() {
+                let prefs = null;
+                try {
+                    prefs = JSON.parse(localStorage.getItem(CANVAS_TOOL_PREFS_KEY) || 'null');
+                } catch (e) { prefs = null; }
+                if (!prefs || typeof prefs !== 'object') { updateCanvasToolBadges(); return; }
+
+                restoringCanvasToolPrefs = true;
+                try {
+                    // セレクトを先に復元する。チェックボックスの change を dispatch した時点で
+                    // 保存処理から参照されうるため、順序を逆にすると既定値で上書きされる。
+                    ['imgScaleSel', 'imgBgSel'].forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el && typeof prefs[id] === 'string') el.value = prefs[id];
+                    });
+                    if (typeof prefs.grid === 'number' && prefs.grid >= 10 && prefs.grid <= 100) {
+                        applyGridSize(prefs.grid);
+                    }
+                    Object.keys(prefs).forEach(id => {
+                        if (typeof prefs[id] !== 'boolean') return;
+                        const el = document.getElementById(id);
+                        if (!el || el.type !== 'checkbox' || el.checked === prefs[id]) return;
+                        el.checked = prefs[id];
+                        el.dispatchEvent(new Event('change', { bubbles: true }));
+                    });
+                    // リンク表示の反映は描画完了後でないと効かないため明示的に呼ぶ
+                    try { _applyLinkVisibility(); } catch (e) { /* 初期描画前は無視 */ }
+                } finally {
+                    restoringCanvasToolPrefs = false;
+                }
+                updateCanvasToolBadges();
+            }
+
+            (function initCanvasTools() {
+                const tools = Array.from(document.querySelectorAll('#canvasTools > details.ctool'));
+
+                // 同時に開くのは1つだけ
+                tools.forEach(t => t.addEventListener('toggle', () => {
+                    if (!t.open) return;
+                    tools.forEach(o => { if (o !== t) o.open = false; });
+                }));
+
+                // キャンバスの外側をクリックしたら閉じる
+                document.addEventListener('click', (e) => {
+                    if (e.target.closest && e.target.closest('#canvasTools')) return;
+                    tools.forEach(t => { t.open = false; });
+                });
+
+                // 設定変更をインジケータとlocalStorageへ反映
+                const watched = ['dragMode', 'showGrid', 'snapGrid', 'lvTemplateRef', 'lvInstanceRef',
+                    'lvChain', 'lvParent', 'lvSameUuidTemplate', 'lvSameUuidInstance',
+                    'imgIncludeGrid', 'imgScaleSel', 'imgBgSel'];
+                watched.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.addEventListener('change', () => {
+                        updateCanvasToolBadges();
+                        saveCanvasToolPrefs();
+                    });
+                });
+                ['gridSizeDec', 'gridSizeInc'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.addEventListener('click', () => {
+                        updateCanvasToolBadges();
+                        saveCanvasToolPrefs();
+                    });
+                });
+
+                // 初期描画が済んでから復元する（リンク表示の反映に selection が必要なため）
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', restoreCanvasToolPrefs);
+                } else {
+                    restoreCanvasToolPrefs();
+                }
+            })();
+
+            // ============================================================
+            // PETRI NET IMAGE EXPORT（SVG直列化 → PNG/SVG 出力）
+            // ============================================================
+
+            // SVGへ焼き込む描画系プロパティ（CSS変数はここで実色に解決される）。
+            // fill / stroke とその opacity は rgba() の分解が必要なので別扱いにする。
+            const EXPORT_STYLE_PROPS = [
+                'fill-rule',
+                'stroke-width', 'stroke-dasharray', 'stroke-dashoffset',
+                'stroke-linecap', 'stroke-linejoin', 'stroke-miterlimit',
+                'opacity', 'display', 'visibility',
+                'marker-start', 'marker-mid', 'marker-end', 'paint-order',
+                'font-family', 'font-size', 'font-weight', 'font-style', 'letter-spacing',
+                'text-anchor', 'dominant-baseline', 'rx', 'ry'
+            ];
+
+            // 単位付きの数値を嫌う実装があるため px を落とすプロパティ
+            const EXPORT_STRIP_PX_PROPS = new Set([
+                'stroke-width', 'stroke-dasharray', 'stroke-dashoffset', 'rx', 'ry'
+            ]);
+
+            // <img>経由のラスタライズではWebフォントが読めないため、安全なスタックへ差し替える
+            const EXPORT_FONT_STACK =
+                'system-ui, -apple-system, "Segoe UI", "Yu Gothic UI", "Hiragino Sans", Meiryo, sans-serif';
+
+            const EXPORT_MAX_DIM = 8192;      // Canvasの実用上限
+            const EXPORT_PADDING = 24;        // 図の周囲の余白(px)
+
+            /**
+             * fill / stroke を SVG 1.1 で解釈できる形に落として属性化する。
+             * getComputedStyle は透明色を rgba(...) で返すが、rgba() は SVG 1.1 に無く、
+             * PowerPoint 等の取り込みでは黒に化ける。rgb() と *-opacity に分解する。
+             */
+            function setExportPaint(dst, prop, colorValue, cssOpacity) {
+                let opacity = parseFloat(cssOpacity);
+                if (!isFinite(opacity)) opacity = 1;
+                let color = (colorValue || '').trim();
+
+                const m = /^rgba?\(([^)]+)\)$/i.exec(color);
+                if (m) {
+                    const n = m[1].split(/[,\s/]+/).filter(s => s !== '').map(Number);
+                    if (n.length >= 4 && isFinite(n[3])) {
+                        opacity *= n[3];
+                        color = `rgb(${n[0]}, ${n[1]}, ${n[2]})`;
+                    }
+                }
+                // 完全に透明なら「塗らない」。黒として解釈されるのを防ぐ。
+                if (!color || color === 'none' || opacity <= 0) {
+                    dst.setAttribute(prop, 'none');
+                    return;
+                }
+                dst.setAttribute(prop, color);
+                if (opacity < 1) {
+                    dst.setAttribute(prop + '-opacity', String(Math.round(opacity * 1000) / 1000));
+                }
+            }
+
+            /**
+             * 元のSVG要素の computed style を、複製先の要素へ**プレゼンテーション属性**として焼き込む。
+             * style 属性ではなく属性にするのは、Office 等の SVG 取り込みが属性の方を確実に解釈するため。
+             * 元DOMと複製は同一構造のため、走査順で1対1に対応する。
+             */
+            function inlineExportStyles(srcRoot, dstRoot) {
+                const srcEls = srcRoot.querySelectorAll('*');
+                const dstEls = dstRoot.querySelectorAll('*');
+                if (srcEls.length !== dstEls.length) return false;
+                for (let i = 0; i < srcEls.length; i++) {
+                    const s = srcEls[i];
+                    // defs 内（marker/pattern）は属性で色指定済みなので対象外
+                    if (s.closest && s.closest('defs')) continue;
+                    const cs = window.getComputedStyle(s);
+                    const d = dstEls[i];
+                    // d3 が付けたインラインスタイルは computed 側に含まれるので取り除く
+                    d.removeAttribute('style');
+
+                    setExportPaint(d, 'fill', cs.getPropertyValue('fill'), cs.getPropertyValue('fill-opacity'));
+                    setExportPaint(d, 'stroke', cs.getPropertyValue('stroke'), cs.getPropertyValue('stroke-opacity'));
+
+                    for (const p of EXPORT_STYLE_PROPS) {
+                        let v = cs.getPropertyValue(p);
+                        if (!v || v === 'auto' || v === 'normal') continue;
+                        if (v === 'none' && p.startsWith('marker')) continue;
+                        // display/visibility は「隠す」場合のみ出力する（既定値を書くと副作用が出るため）
+                        if (p === 'display' && v !== 'none') continue;
+                        if (p === 'visibility' && v !== 'hidden') continue;
+                        if (p === 'font-family') v = EXPORT_FONT_STACK;
+                        // url("#arrow") の引用符は取り込み側で解釈されないことがある
+                        if (p.startsWith('marker')) v = v.replace(/["']/g, '');
+                        if (EXPORT_STRIP_PX_PROPS.has(p)) v = v.replace(/px\b/g, '');
+                        d.setAttribute(p, v.trim());
+                    }
+                }
+                return true;
+            }
+
+            /**
+             * 現在のペトリネット図を、単体で表示可能なSVG要素として組み立てる。
+             * ズーム/パンの状態に依存せず、グラフ全体が収まる範囲で出力する。
+             * @returns {{el: SVGSVGElement, width:number, height:number}|null}
+             */
+            function buildPetriNetExportSvg(opts) {
+                const o = opts || {};
+                const stageEl = svg.node();
+                const rootEl = gRoot.node();
+                if (!stageEl || !rootEl) return null;
+
+                let bbox;
+                try { bbox = rootEl.getBBox(); } catch (e) { return null; }
+                if (!bbox || !(bbox.width > 0) || !(bbox.height > 0)) return null;
+
+                const x = bbox.x - EXPORT_PADDING;
+                const y = bbox.y - EXPORT_PADDING;
+                const w = bbox.width + EXPORT_PADDING * 2;
+                const h = bbox.height + EXPORT_PADDING * 2;
+
+                const NS = 'http://www.w3.org/2000/svg';
+                const out = document.createElementNS(NS, 'svg');
+                out.setAttribute('xmlns', NS);
+                out.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
+                out.setAttribute('version', '1.1');
+                out.setAttribute('width', String(Math.ceil(w)));
+                out.setAttribute('height', String(Math.ceil(h)));
+                out.setAttribute('viewBox', `${x} ${y} ${w} ${h}`);
+
+                // defs（矢印マーカー・グリッドpattern）を複製。ズーム由来の変形は取り除く
+                stageEl.querySelectorAll(':scope > defs').forEach(df => {
+                    const c = df.cloneNode(true);
+                    c.querySelectorAll('pattern').forEach(p => p.removeAttribute('patternTransform'));
+                    out.appendChild(c);
+                });
+
+                // 背景
+                if (o.background && o.background !== 'transparent') {
+                    const bg = document.createElementNS(NS, 'rect');
+                    bg.setAttribute('x', x); bg.setAttribute('y', y);
+                    bg.setAttribute('width', w); bg.setAttribute('height', h);
+                    bg.setAttribute('fill', o.background);
+                    out.appendChild(bg);
+                }
+
+                // グリッド（任意）
+                if (o.includeGrid) {
+                    const gr = document.createElementNS(NS, 'rect');
+                    gr.setAttribute('x', x); gr.setAttribute('y', y);
+                    gr.setAttribute('width', w); gr.setAttribute('height', h);
+                    gr.setAttribute('fill', 'url(#svgGrid)');
+                    out.appendChild(gr);
+                }
+
+                // 図本体（ズームのtransformを外して等倍で配置）
+                const gClone = rootEl.cloneNode(true);
+                gClone.removeAttribute('transform');
+                inlineExportStyles(rootEl, gClone);
+                out.appendChild(gClone);
+
+                return { el: out, width: w, height: h };
+            }
+
+            /** 出力オプションをUIから読み取る */
+            function readImageExportOptions() {
+                const bgMode = document.getElementById('imgBgSel')?.value || 'theme';
+                let background = null;
+                if (bgMode === 'white') background = '#ffffff';
+                else if (bgMode === 'theme') {
+                    // #stage の background は transition 付きのため、CSS変数から直接読む
+                    background = window.getComputedStyle(document.documentElement)
+                        .getPropertyValue('--bg').trim();
+                    if (!background) {
+                        background = window.getComputedStyle(svg.node()).backgroundColor || '#ffffff';
+                    }
+                    if (!background || background === 'rgba(0, 0, 0, 0)' || background === 'transparent') {
+                        background = window.getComputedStyle(document.body).backgroundColor || '#ffffff';
+                    }
+                }
+                return {
+                    background,
+                    includeGrid: !!document.getElementById('imgIncludeGrid')?.checked,
+                    scale: parseFloat(document.getElementById('imgScaleSel')?.value || '2') || 2
+                };
+            }
+
+            /** 図が空でないかを確認しつつ、SVG文字列を生成する */
+            function buildPetriNetSvgString(opts) {
+                const built = buildPetriNetExportSvg(opts);
+                if (!built) return null;
+                const xml = new XMLSerializer().serializeToString(built.el);
+                return {
+                    text: '<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n' + xml,
+                    width: built.width,
+                    height: built.height
+                };
+            }
+
+            /** SVG文字列をPNG Blobへラスタライズする */
+            function svgStringToPngBlob(svgText, width, height, scale) {
+                return new Promise((resolve, reject) => {
+                    // Canvasの上限を超えないよう倍率を自動調整
+                    const eff = Math.min(scale, EXPORT_MAX_DIM / width, EXPORT_MAX_DIM / height);
+                    const cw = Math.max(1, Math.round(width * eff));
+                    const ch = Math.max(1, Math.round(height * eff));
+                    const url = URL.createObjectURL(new Blob([svgText], { type: 'image/svg+xml;charset=utf-8' }));
+                    const img = new Image();
+                    img.onload = () => {
+                        try {
+                            const c = document.createElement('canvas');
+                            c.width = cw; c.height = ch;
+                            const ctx = c.getContext('2d');
+                            ctx.drawImage(img, 0, 0, cw, ch);
+                            URL.revokeObjectURL(url);
+                            c.toBlob(b => b ? resolve(b) : reject(new Error('toBlob returned null')), 'image/png');
+                        } catch (e) {
+                            URL.revokeObjectURL(url);
+                            reject(e);
+                        }
+                    };
+                    img.onerror = () => {
+                        URL.revokeObjectURL(url);
+                        reject(new Error('SVG image load failed'));
+                    };
+                    img.src = url;
+                });
+            }
+
+            /** エクスポート用のファイル名を組み立てる */
+            function petriNetExportFileName(ext) {
+                const key = String(netKey || 'default').replace(/[\\/:*?"<>|]/g, '_').slice(0, 60);
+                return `MaiML_PetriNet_${key}_${todayString()}.${ext}`;
+            }
+
+            /** ボタンのラベルを一時的に差し替えてフィードバックする */
+            function flashButtonLabel(btn, label, ms) {
+                if (!btn) return;
+                if (btn.dataset.origLabel === undefined) btn.dataset.origLabel = btn.textContent;
+                btn.textContent = label;
+                clearTimeout(btn._flashTimer);
+                btn._flashTimer = setTimeout(() => {
+                    btn.textContent = btn.dataset.origLabel;
+                }, ms || 2000);
+            }
+
+            /** PNG Blob を生成（オプション読み取り込み）。図が空なら null */
+            async function buildPetriNetPngBlob() {
+                const opts = readImageExportOptions();
+                const svgData = buildPetriNetSvgString(opts);
+                if (!svgData) return null;
+                return await svgStringToPngBlob(svgData.text, svgData.width, svgData.height, opts.scale);
+            }
+
+            // ── 📋 クリップボードにコピー ──
+            document.getElementById('imgCopyBtn')?.addEventListener('click', async (ev) => {
+                const btn = ev.currentTarget;
+                const opts = readImageExportOptions();
+                const svgData = buildPetriNetSvgString(opts);
+                if (!svgData) { flashButtonLabel(btn, '⚠ No diagram'); return; }
+
+                if (!navigator.clipboard || typeof window.ClipboardItem === 'undefined') {
+                    flashButtonLabel(btn, '⚠ Not supported → saving', 2500);
+                    try {
+                        const blob = await svgStringToPngBlob(svgData.text, svgData.width, svgData.height, opts.scale);
+                        downloadFile(blob, petriNetExportFileName('png'), 'image/png');
+                    } catch (e) { console.error('PNG export failed:', e); }
+                    return;
+                }
+
+                flashButtonLabel(btn, '⏳ Rendering…', 60000);
+                try {
+                    // ユーザー操作の有効期限を維持するため Promise のまま渡す
+                    const item = new ClipboardItem({
+                        'image/png': svgStringToPngBlob(svgData.text, svgData.width, svgData.height, opts.scale)
+                    });
+                    await navigator.clipboard.write([item]);
+                    flashButtonLabel(btn, '✅ Copied!');
+                } catch (err) {
+                    console.warn('Clipboard write (promise form) failed, retrying:', err);
+                    try {
+                        const blob = await svgStringToPngBlob(svgData.text, svgData.width, svgData.height, opts.scale);
+                        await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+                        flashButtonLabel(btn, '✅ Copied!');
+                    } catch (err2) {
+                        console.error('Clipboard write failed:', err2);
+                        flashButtonLabel(btn, '❌ Copy failed → saving', 2500);
+                        try {
+                            const blob = await svgStringToPngBlob(svgData.text, svgData.width, svgData.height, opts.scale);
+                            downloadFile(blob, petriNetExportFileName('png'), 'image/png');
+                        } catch (e) { console.error('PNG export failed:', e); }
+                    }
+                }
+            });
+
+            // ── 💾 PNGで保存 ──
+            document.getElementById('imgSavePngBtn')?.addEventListener('click', async (ev) => {
+                const btn = ev.currentTarget;
+                flashButtonLabel(btn, '⏳ Rendering…', 60000);
+                try {
+                    const blob = await buildPetriNetPngBlob();
+                    if (!blob) { flashButtonLabel(btn, '⚠ No diagram'); return; }
+                    downloadFile(blob, petriNetExportFileName('png'), 'image/png');
+                    flashButtonLabel(btn, '✅ Saved');
+                } catch (e) {
+                    console.error('PNG export failed:', e);
+                    flashButtonLabel(btn, '❌ Save failed', 2500);
+                }
+            });
+
+            // ── 💾 SVGで保存 ──
+            document.getElementById('imgSaveSvgBtn')?.addEventListener('click', (ev) => {
+                const btn = ev.currentTarget;
+                try {
+                    const svgData = buildPetriNetSvgString(readImageExportOptions());
+                    if (!svgData) { flashButtonLabel(btn, '⚠ No diagram'); return; }
+                    downloadFile(svgData.text, petriNetExportFileName('svg'), 'image/svg+xml;charset=utf-8');
+                    flashButtonLabel(btn, '✅ Saved');
+                } catch (e) {
+                    console.error('SVG export failed:', e);
+                    flashButtonLabel(btn, '❌ Save failed', 2500);
+                }
             });
 
 
