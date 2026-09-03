@@ -2048,7 +2048,7 @@ header .chk input[type="checkbox"] {
             <div style="display:flex; align-items:center; gap:8px;">
                 <div class="dl-progress-text" id="dlProgressText" style="flex:1;">Loading...</div>
                 <button id="dlScanCancelBtn" onclick="dlCancelScan()" style="display:none;
-                        font-size:11px; padding:2px 8px; cursor:pointer;">中止</button>
+                        font-size:11px; padding:2px 8px; cursor:pointer;">Cancel</button>
             </div>
             <div class="dl-progress-bar-track">
                 <div class="dl-progress-bar-fill" id="dlProgressBarFill"></div>
@@ -2266,7 +2266,7 @@ header .chk input[type="checkbox"] {
                             <button id="gridSizeDec" class="btn" style="padding:1px 7px;min-width:unset;">−</button>
                             <span id="gridSizeVal"
                                 style="min-width:28px;text-align:center;font-variant-numeric:tabular-nums;">20</span>
-                            <button id="gridSizeInc" class="btn" style="padding:1px 7px;min-width:unset;">＋</button>
+                            <button id="gridSizeInc" class="btn" style="padding:1px 7px;min-width:unset;">+</button>
                         </span>
                     </div>
                 </details>
@@ -2510,10 +2510,10 @@ header .chk input[type="checkbox"] {
                 <div style="display: flex; align-items: center; gap: 1rem;">Language
                     <div
                         style="display: flex; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 2px;">
-                        <button onclick="switchManualLang('jp', this)" class="active"
-                            style="border: none; background: var(--surface); color: var(--accent); padding: 4px 12px; font-size: 12px; font-weight: 600; cursor: pointer; border-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">JP</button>
-                        <button onclick="switchManualLang('en', this)"
-                            style="border: none; background: transparent; color: var(--muted); padding: 4px 12px; font-size: 12px; font-weight: 600; cursor: pointer; border-radius: 4px;">EN</button>
+                        <button onclick="switchManualLang('jp', this)"
+                            style="border: none; background: transparent; color: var(--muted); padding: 4px 12px; font-size: 12px; font-weight: 600; cursor: pointer; border-radius: 4px;">JP</button>
+                        <button onclick="switchManualLang('en', this)" class="active"
+                            style="border: none; background: var(--surface); color: var(--accent); padding: 4px 12px; font-size: 12px; font-weight: 600; cursor: pointer; border-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">EN</button>
                     </div>
                     <button class="modal-close" onclick="document.getElementById('helpModal').classList.remove('show')"
                         style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--muted);">×</button>
@@ -2523,14 +2523,14 @@ header .chk input[type="checkbox"] {
             <div class="modal-body" style="padding: 2rem; overflow-y: auto; flex-grow: 1; line-height: 1.7;">
 
 <details style="margin-bottom:1.5rem; border:1px solid rgba(128,128,128,0.35); border-radius:6px; padding:8px 12px;">
-  <summary style="cursor:pointer; font-weight:600;">オープンソースライセンス / Open Source Licenses</summary>
+  <summary style="cursor:pointer; font-weight:600;">Open Source Licenses</summary>
   <div style="font-size:0.85em; line-height:1.6; margin-top:8px;">
-    <p>本ツールは以下のオープンソースソフトウェアを内包しています。いずれも無償で利用でき、下記の著作権表示と許諾条件のもとで再配布されます。</p>
-    <ul style="padding-left:1.2em;"><li style="margin-bottom:6px;"><strong>qrcodejs 1.0.0</strong> — MIT<br><span style="opacity:0.75;">Copyright (c) 2012 Sangmin Shim</span><br><span style="opacity:0.6; font-size:0.9em;">https://github.com/davidshimjs/qrcodejs</span></li><li style="margin-bottom:6px;"><strong>JSZip 3.10.1</strong> — MIT または GPLv3 のデュアルライセンス（本ツールは MIT を選択）<br><span style="opacity:0.75;">Copyright (c) 2009-2016 Stuart Knightley</span><br><span style="opacity:0.6; font-size:0.9em;">https://github.com/Stuk/jszip</span></li><li style="margin-bottom:6px;"><strong>dagre 0.8.5 / graphlib</strong> — MIT<br><span style="opacity:0.75;">Copyright (c) 2012-2014 Chris Pettitt</span><br><span style="opacity:0.6; font-size:0.9em;">https://github.com/dagrejs/dagre</span></li><li style="margin-bottom:6px;"><strong>lodash（dagre 同梱）</strong> — MIT<br><span style="opacity:0.75;">Copyright OpenJS Foundation and other contributors</span><br><span style="opacity:0.6; font-size:0.9em;">https://github.com/lodash/lodash</span></li><li style="margin-bottom:6px;"><strong>marked 11.1.1</strong> — MIT<br><span style="opacity:0.75;">Copyright (c) 2011-2024, Christopher Jeffrey and contributors</span><br><span style="opacity:0.6; font-size:0.9em;">https://github.com/markedjs/marked</span></li><li style="margin-bottom:6px;"><strong>d3 (v7 系)</strong> — ISC<br><span style="opacity:0.75;">Copyright 2010-2023 Mike Bostock</span><br><span style="opacity:0.6; font-size:0.9em;">https://github.com/d3/d3</span></li></ul>
+    <p>This tool bundles the open source software listed below. All of it is free to use and is redistributed under the copyright notices and license terms shown here.</p>
+    <ul style="padding-left:1.2em;"><li style="margin-bottom:6px;"><strong>qrcodejs 1.0.0</strong> — MIT<br><span style="opacity:0.75;">Copyright (c) 2012 Sangmin Shim</span><br><span style="opacity:0.6; font-size:0.9em;">https://github.com/davidshimjs/qrcodejs</span></li><li style="margin-bottom:6px;"><strong>JSZip 3.10.1</strong> — dual-licensed MIT or GPLv3 (this tool uses MIT)<br><span style="opacity:0.75;">Copyright (c) 2009-2016 Stuart Knightley</span><br><span style="opacity:0.6; font-size:0.9em;">https://github.com/Stuk/jszip</span></li><li style="margin-bottom:6px;"><strong>dagre 0.8.5 / graphlib</strong> — MIT<br><span style="opacity:0.75;">Copyright (c) 2012-2014 Chris Pettitt</span><br><span style="opacity:0.6; font-size:0.9em;">https://github.com/dagrejs/dagre</span></li><li style="margin-bottom:6px;"><strong>lodash (bundled with dagre)</strong> — MIT<br><span style="opacity:0.75;">Copyright OpenJS Foundation and other contributors</span><br><span style="opacity:0.6; font-size:0.9em;">https://github.com/lodash/lodash</span></li><li style="margin-bottom:6px;"><strong>marked 11.1.1</strong> — MIT<br><span style="opacity:0.75;">Copyright (c) 2011-2024, Christopher Jeffrey and contributors</span><br><span style="opacity:0.6; font-size:0.9em;">https://github.com/markedjs/marked</span></li><li style="margin-bottom:6px;"><strong>d3 (v7)</strong> — ISC<br><span style="opacity:0.75;">Copyright 2010-2023 Mike Bostock</span><br><span style="opacity:0.6; font-size:0.9em;">https://github.com/d3/d3</span></li></ul>
     <p style="margin-top:8px;"><strong>MIT License</strong><br>Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</p><p style="margin-top:8px;"><strong>ISC License</strong><br>Permission to use, copy, modify, and/or distribute this software for any purpose with or without fee is hereby granted, provided that the above copyright notice and this permission notice appear in all copies. THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.</p>
   </div>
 </details>
-                <div id="manual-jp" style="display: block;">
+                <div id="manual-jp" style="display: none;">
                     <div style="margin-bottom: 2.5rem;">
                         <h2
                             style="font-size: 1.4rem; color: var(--ink); border-bottom: 2px solid var(--accent); padding-bottom: 0.3rem; margin-bottom: 1rem;">
@@ -2921,7 +2921,7 @@ header .chk input[type="checkbox"] {
 
                 </div>
 
-                <div id="manual-en" style="display: none;">
+                <div id="manual-en" style="display: block;">
                     <div style="margin-bottom: 2.5rem;">
                         <h2
                             style="font-size: 1.4rem; color: var(--ink); border-bottom: 2px solid var(--accent); padding-bottom: 0.3rem; margin-bottom: 1rem;">
@@ -3037,7 +3037,7 @@ header .chk input[type="checkbox"] {
                         <h4 style="font-size: 1rem; margin: 0.9rem 0 0.3rem;">⚙ View — canvas display settings</h4>
                         <ul style="padding-left: 1.5rem;">
                             <li><strong>Drag Edit:</strong> Allow nodes to be repositioned by dragging.</li>
-                            <li><strong>Show Grid:</strong> Display grid lines. Use <strong>Grid</strong> ＋ / − to
+                            <li><strong>Show Grid:</strong> Display grid lines. Use <strong>Grid</strong> + / − to
                                 change the spacing (10–100 px).</li>
                             <li><strong>Snap to Grid:</strong> Snap nodes to the grid while dragging.</li>
                         </ul>
@@ -9517,7 +9517,7 @@ pkijs/build/index.es.js:
                 } finally {
                     clearInterval(timer);
                     generateBtn.textContent = '🚀 Generate';
-                    elapsedEl.textContent = `処理時間: ${fmtTime(elapsed)}`;
+                    elapsedEl.textContent = `Elapsed: ${fmtTime(elapsed)}`;
                 }
             });
 
@@ -9560,7 +9560,7 @@ pkijs/build/index.es.js:
                 const modelSelect = document.getElementById("modelName");
                 const fetchBtn = document.getElementById("fetchModelsBtn");
                 if (!key) {
-                    if (forceRefresh) alert("Gemini API Key が設定されていません。\nまず API Key を設定してください。");
+                    if (forceRefresh) alert("Gemini API Key is not set.\nPlease set an API Key first.");
                     return;
                 }
                 if (modelsFetched && !forceRefresh) return;
@@ -9569,7 +9569,7 @@ pkijs/build/index.es.js:
                     const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${key}&pageSize=100`);
                     const data = await res.json();
                     if (data.error) {
-                        if (forceRefresh) alert("API エラー: " + data.error.message);
+                        if (forceRefresh) alert("API error: " + data.error.message);
                         return;
                     }
                     const savedModel = localStorage.getItem(STORAGE_KEY_MODEL);
@@ -9577,7 +9577,7 @@ pkijs/build/index.es.js:
                     const models = (data.models || [])
                         .filter(m => (m.supportedGenerationMethods || []).includes("generateContent"))
                         .sort((a, b) => a.name.localeCompare(b.name));
-                    if (models.length === 0) { if (forceRefresh) alert("利用可能なモデルが見つかりませんでした。"); return; }
+                    if (models.length === 0) { if (forceRefresh) alert("No available models were found."); return; }
                     modelSelect.innerHTML = "";
                     models.forEach(m => {
                         const modelId = m.name.replace("models/", "");
@@ -9591,7 +9591,7 @@ pkijs/build/index.es.js:
                     localStorage.setItem(STORAGE_KEY_MODEL, modelSelect.value);
                     modelsFetched = true;
                 } catch (e) {
-                    if (forceRefresh) alert("ネットワークエラー: " + e.message);
+                    if (forceRefresh) alert("Network error: " + e.message);
                 } finally {
                     if (fetchBtn) { fetchBtn.disabled = false; fetchBtn.textContent = "🔄"; }
                 }
@@ -11251,7 +11251,7 @@ pkijs/build/index.es.js:
                 if (modal) {
                     modal.classList.add('show');
                 } else {
-                    alert('エラー: ヘルプ画面のHTMLが見つかりません。\n"helpModal" というIDを持つHTMLブロックが正しく貼り付けられているか確認してください。');
+                    alert('Error: Help screen HTML not found.\nCheck that the HTML block with id "helpModal" is correctly included.');
                 }
             });
 
@@ -11643,14 +11643,14 @@ pkijs/build/index.es.js:
                     if (file.size > DL_MAX_INDEX_MB * 1048576) {
                         dlUnindexed.push({
                             name: file.name,
-                            reason: `サイズ超過（${(file.size / 1048576).toFixed(0)} MB > ${DL_MAX_INDEX_MB} MB）`
+                            reason: `Too large (${(file.size / 1048576).toFixed(0)} MB > ${DL_MAX_INDEX_MB} MB)`
                         });
                         continue;
                     }
 
                     const entry = await indexFile(file, i);
                     if (entry) dlIndex.push(entry);
-                    else dlUnindexed.push({ name: file.name, reason: 'XMLとして読めない、またはMaiMLではない' });
+                    else dlUnindexed.push({ name: file.name, reason: 'Not readable as XML, or not a MaiML file' });
 
                     if (i % 5 === 0) await yieldFrame();
                 }
@@ -11674,12 +11674,12 @@ pkijs/build/index.es.js:
                 const rows = dlUnindexed.slice(0, 50)
                     .map(u => `<li>${esc(u.name)} — ${esc(u.reason)}</li>`).join('');
                 const more = dlUnindexed.length > 50
-                    ? `<div style="opacity:0.7;">他 ${dlUnindexed.length - 50} 件</div>` : '';
+                    ? `<div style="opacity:0.7;">${dlUnindexed.length - 50} more</div>` : '';
                 box.style.display = '';
                 box.innerHTML = `<details><summary style="cursor:pointer;">`
-                    + `⚠ ${dlUnindexed.length} 件を索引できませんでした（検索結果に出ません）</summary>`
+                    + `⚠ ${dlUnindexed.length} file(s) could not be indexed (excluded from search results)</summary>`
                     + `<ul style="padding-left:1.2em; margin:6px 0;">${rows}</ul>${more}`
-                    + `<div style="opacity:0.75;">サイズ超過のファイルも「全ファイルを直接走査」なら検索できます。</div>`
+                    + `<div style="opacity:0.75;">Oversized files can still be searched with a direct full scan.</div>`
                     + `</details>`;
             }
 
@@ -11814,9 +11814,9 @@ pkijs/build/index.es.js:
                     elResultsList.innerHTML = `
                     <div class="dl-empty-state">
                         <div class="dl-empty-icon">📁</div>
-                        <div>フォルダが開かれていません</div>
+                        <div>No folder is open</div>
                         <div style="font-size:11px; opacity:0.8; margin-top:6px;">
-                            Open Folder でフォルダを選び直してください。
+                            Use "Open Folder" to select a folder.
                         </div>
                     </div>`;
                     return;
@@ -11839,8 +11839,8 @@ pkijs/build/index.es.js:
                     const f = files[i];
                     const sec = ((performance.now() - t0) / 1000).toFixed(0);
                     showProgress(true,
-                        `本文を検索中 ${i + 1} / ${files.length} 件`
-                        + `（${(readBytes / 1048576).toFixed(0)} / ${(total / 1048576).toFixed(0)} MB・${sec} 秒）`
+                        `Scanning contents ${i + 1} / ${files.length}`
+                        + ` (${(readBytes / 1048576).toFixed(0)} / ${(total / 1048576).toFixed(0)} MB, ${sec} s)`
                         + ` ${f.name.slice(0, 40)}`,
                         Math.round((readBytes / Math.max(total, 1)) * 100));
                     await yieldFrame();
@@ -11860,7 +11860,7 @@ pkijs/build/index.es.js:
                 for (let i = 0; i < hits.length; i++) {
                     const e = await dlEntryForFile(hits[i].file, i);
                     if (!passesNonKeyword(e)) continue;   // 日付やフィルターに合わないものは除く
-                    e._matchReasons = [{ label: '本文', value: hits[i].snippet }];
+                    e._matchReasons = [{ label: 'Content', value: hits[i].snippet }];
                     entries.push(e);
                 }
 
@@ -11894,9 +11894,9 @@ pkijs/build/index.es.js:
                 const bar = document.createElement('div');
                 bar.style.cssText = 'margin:0.3rem 0.4rem; padding:6px 8px; font-size:11px;'
                     + 'border:1px dashed #b45309; color:#b45309; border-radius:6px;';
-                bar.innerHTML = `⚠ 検索できなかったファイルがあります`
-                    + (n.skipped ? ` ／ ZIPが大きすぎてスキップ ${n.skipped} 件` : '')
-                    + (n.failed ? ` ／ 読み取り失敗 ${n.failed} 件` : '');
+                bar.innerHTML = `⚠ Some files could not be searched`
+                    + (n.skipped ? ` / ${n.skipped} skipped (ZIP too large)` : '')
+                    + (n.failed ? ` / ${n.failed} failed to read` : '');
                 elResultsList.prepend(bar);
             }
 
@@ -12134,10 +12134,10 @@ pkijs/build/index.es.js:
                 const bar = document.createElement('div');
                 bar.style.cssText = 'margin:0.3rem 0.4rem; padding:6px 8px; font-size:11px;'
                     + 'border:1px dashed #b45309; color:#b45309; border-radius:6px;';
-                bar.innerHTML = `⚠ 索引だけで絞り込んでいます。索引には 1 ファイルあたりの上限があるため`
-                    + `取りこぼしがあり得ます。`
+                bar.innerHTML = `⚠ Filtering by index only. The index has a per-file size limit,`
+                    + ` so some matches may be missed.`
                     + `<button class="dl-hdr-btn dl-hdr-btn-primary" style="margin-left:8px;"`
-                    + ` onclick="dlDirectScan(true)">🔎 本文も確認（${dlScanTooBig.mb.toFixed(0)} MB）</button>`;
+                    + ` onclick="dlDirectScan(true)">🔎 Scan contents (${dlScanTooBig.mb.toFixed(0)} MB)</button>`;
                 elResultsList.prepend(bar);
             }
 
@@ -12225,9 +12225,9 @@ pkijs/build/index.es.js:
                     elResultsList.innerHTML = `
                     <div class="dl-empty-state">
                         <div class="dl-empty-icon">🔍</div>
-                        <div>${waiting ? '索引には見つかりませんでした' : 'No files match the criteria'}</div>
+                        <div>${waiting ? 'Not found in the index' : 'No files match the criteria'}</div>
                         ${waiting ? `<div style="font-size:11px; opacity:0.8; margin-top:6px;">
-                            ファイル本文を確認しています…</div>` : ''}
+                            Scanning file contents…</div>` : ''}
                     </div>`;
                     return;
                 }
