@@ -593,15 +593,30 @@ header#toolbar {
             stroke-width: 2
         }
 
-        /* placeType ごとのストロークカラー */
-        .nodes .place.place-material  circle { stroke: #3b82f6; }
-        .nodes .place.place-condition circle { stroke: #f59e0b; }
-        .nodes .place.place-result    circle { stroke: #10b981; }
+        /* placeType ごとの配色。MaiMLStudio の Petri Net Design と同一にしている
+           （M=green / C=blue / R=purple）。Studio 側の基準は Templates タブの
+           バッジ色（bg-*-100 / text-*-700、dark は bg-*-900 blend / text-*-300）。
+           同じ文書を Studio と Viewer で並べたときに色が変わらないようにするため、
+           片方だけ変更しないこと。 */
+        .nodes .place.place-material  circle { stroke: #15803d; fill: #dcfce7; }
+        .nodes .place.place-condition circle { stroke: #1d4ed8; fill: #dbeafe; }
+        .nodes .place.place-result    circle { stroke: #7e22ce; fill: #f3e8ff; }
+        /* template 未割り当て。型色に寄せると material 等と紛れるので muted にする
+           （var(--muted) は #64748b / dark #94a3b8 = Studio の未割り当てと同値） */
+        .nodes .place.place-unknown   circle { stroke: var(--muted); }
 
-        /* バッジテキストの色（circle と同色） */
-        .nodes .place.place-material  .place-type-badge { fill: #3b82f6; }
-        .nodes .place.place-condition .place-type-badge { fill: #f59e0b; }
-        .nodes .place.place-result    .place-type-badge { fill: #10b981; }
+        /* バッジテキストの色（circle の stroke と同色） */
+        .nodes .place.place-material  .place-type-badge { fill: #15803d; }
+        .nodes .place.place-condition .place-type-badge { fill: #1d4ed8; }
+        .nodes .place.place-result    .place-type-badge { fill: #7e22ce; }
+
+        /* ダークテーマ。data-theme は initTheme() が必ず dark/light を設定する */
+        :root[data-theme="dark"] .nodes .place.place-material  circle { stroke: #86efac; fill: #194033; }
+        :root[data-theme="dark"] .nodes .place.place-condition circle { stroke: #93c5fd; fill: #1e3267; }
+        :root[data-theme="dark"] .nodes .place.place-result    circle { stroke: #d8b4fe; fill: #3e2265; }
+        :root[data-theme="dark"] .nodes .place.place-material  .place-type-badge { fill: #86efac; }
+        :root[data-theme="dark"] .nodes .place.place-condition .place-type-badge { fill: #93c5fd; }
+        :root[data-theme="dark"] .nodes .place.place-result    .place-type-badge { fill: #d8b4fe; }
 
         /* selected 時：circle/rect は赤、バッジ文字は元の色を維持 */
         .node.selected circle,
