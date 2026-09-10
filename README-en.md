@@ -3,7 +3,12 @@
 A standalone web application for visualizing and analyzing MaiML (Measurement Analysis Instrument Markup Language) files.
 
 <p align="center">
-  <a href="docs/screenshot.png"><img src="docs/screenshot.png" alt="The MaiML Standalone Viewer display" width="860"></a>
+  <a href="docs/screenshot.png">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="docs/screenshot_dark.png">
+      <img src="docs/screenshot.png" alt="The MaiML Standalone Viewer display" width="860">
+    </picture>
+  </a>
 </p>
 
 ## 🌟 Key Features

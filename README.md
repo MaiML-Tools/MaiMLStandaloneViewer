@@ -8,7 +8,12 @@
 MaiML (Measurement Analysis Instrument Markup Language) ファイルを可視化・分析するためのスタンドアロン Webアプリケーション。
 
 <p align="center">
-  <a href="docs/screenshot.png"><img src="docs/screenshot.png" alt="MaiML Standalone Viewer の表示画面" width="860"></a>
+  <a href="docs/screenshot.png">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="docs/screenshot_dark.png">
+      <img src="docs/screenshot.png" alt="MaiML Standalone Viewer の表示画面" width="860">
+    </picture>
+  </a>
 </p>
 
 ## 🌟 主な機能
