@@ -4626,7 +4626,8 @@ pkijs/build/index.es.js:
                     if (progressBar) progressBar.style.width = '50%';
 
                     // MaiMLファイルの内容を読み込み
-                    const maimlText = await maimlFile.async('text');
+                    // JSZipのtextデコードはUTF-8 BOMを除去しないため明示的に取り除く（TextDecoderは自動除去するため単体ファイル読込と挙動を揃える）
+                    const maimlText = (await maimlFile.async('text')).replace(/^﻿/, '');
                     // ハッシュ検証用にArrayBufferも取得してchainFileCacheに保存
                     const maimlArrayBuffer = await maimlFile.async('arraybuffer');
 
@@ -4659,8 +4660,8 @@ pkijs/build/index.es.js:
                                     // 画像ファイルはArrayBufferとして読み込み
                                     fileData = await zipEntry.async('arraybuffer');
                                 } else {
-                                    // テキストファイルはテキストとして読み込み
-                                    fileData = await zipEntry.async('text');
+                                    // テキストファイルはテキストとして読み込み（BOMがあれば除去）
+                                    fileData = (await zipEntry.async('text')).replace(/^﻿/, '');
                                 }
 
                                 // ファイル名のバリエーションを登録
@@ -11779,7 +11780,7 @@ pkijs/build/index.es.js:
                 for (const [name, entry] of Object.entries(zip.files)) {
                     const l = name.toLowerCase();
                     if (entry.dir || !(l.endsWith('.maiml') || l.endsWith('.xml') || l.endsWith('.mai'))) continue;
-                    const text = await entry.async('text');
+                    const text = (await entry.async('text')).replace(/^﻿/, '');
                     const at = text.toLowerCase().indexOf(needle);
                     if (at >= 0) {
                         const from = Math.max(0, at - DL_SCAN.contextChars);
@@ -11935,7 +11936,7 @@ pkijs/build/index.es.js:
                             }
                         }
                         if (!maimlEntry) return null;
-                        xmlText = await maimlEntry.async('text');
+                        xmlText = (await maimlEntry.async('text')).replace(/^﻿/, '');
                     } else {
                         xmlText = await file.text();
                     }
