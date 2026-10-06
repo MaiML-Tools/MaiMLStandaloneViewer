@@ -5614,75 +5614,37 @@ pkijs/build/index.es.js:
                 });
                 html += "</table>";
 
-                // <property>要素の抽出と表示（階層構造対応）
-                const propertyElements = Array.from(documentElement.getElementsByTagNameNS("http://www.maiml.org/schemas", "property"));
+                // <property>/<content> の抽出と表示（どちらも子を持てる。値と子の併存も可）
+                const isPropOrContent = e => e.localName === 'property' || e.localName === 'content';
 
-                // document要素の直接の子要素であるpropertyのみをフィルタリング
-                const directProperties = propertyElements.filter(prop => prop.parentNode === documentElement);
+                // <document> 直下の property / content を DOM 順で収集
+                const directItems = Array.from(documentElement.children || []).filter(isPropOrContent);
 
-                // content要素を解析する関数（leafノード）
-                function parseContentElement(contentEl, level = 0) {
-                    const key = contentEl.getAttribute('key') || '';
-                    const type = contentEl.getAttribute('xsi:type') || contentEl.getAttributeNS('http://www.w3.org/2001/XMLSchema-instance', 'type') || '';
-                    const units = contentEl.getAttribute('units') || '';
+                // property / content を再帰的に解析する（子は property・content を DOM 順で保持）
+                function parseNestedItem(el, level = 0) {
+                    const key = el.getAttribute('key') || '';
+                    const type = el.getAttribute('xsi:type') || el.getAttributeNS('http://www.w3.org/2001/XMLSchema-instance', 'type') || '';
+                    const units = el.getAttribute('units') || '';
 
-                    const directChildren = Array.from(contentEl.children || []);
-                    const descEl = directChildren.find(e => e.localName === 'description' || e.tagName.includes('description'));
-                    const valueEl = directChildren.find(e => e.localName === 'value' || e.tagName.includes('value'));
-
-                    const description = descEl ? descEl.textContent.trim() : '';
-                    const value = valueEl ? valueEl.textContent.trim() : '';
+                    const directChildren = Array.from(el.children || []);
+                    const descEl = directChildren.find(e => e.localName === 'description');
+                    const valueEl = directChildren.find(e => e.localName === 'value');
 
                     return {
                         key,
                         type,
-                        description,
-                        value,
+                        description: descEl ? descEl.textContent.trim() : '',
+                        value: valueEl ? valueEl.textContent.trim() : '',
                         units,
                         level,
-                        isContent: true,
-                        children: []
+                        kind: el.localName,
+                        isContent: el.localName === 'content',
+                        children: directChildren.filter(isPropOrContent).map(child => parseNestedItem(child, level + 1))
                     };
                 }
+                const parsePropertyRecursive = parseNestedItem;
 
-                // 再帰的にproperty要素を解析する関数（content子要素にも対応）
-                function parsePropertyRecursive(propEl, level = 0) {
-                    const key = propEl.getAttribute('key') || '';
-                    const type = propEl.getAttribute('xsi:type') || propEl.getAttributeNS('http://www.w3.org/2001/XMLSchema-instance', 'type') || '';
-                    const units = propEl.getAttribute('units') || '';
-
-                    // 直接の子要素のみを取得
-                    const directChildren = Array.from(propEl.children || []);
-                    const descEl = directChildren.find(e => e.localName === 'description' || e.tagName.includes('description'));
-                    const valueEl = directChildren.find(e => e.localName === 'value' || e.tagName.includes('value'));
-
-                    const description = descEl ? descEl.textContent.trim() : '';
-                    const value = valueEl ? valueEl.textContent.trim() : '';
-
-                    // propertyとcontent両方の子要素をDOM順序で収集
-                    const allChildren = directChildren.filter(e =>
-                        e.localName === 'property' || e.tagName.includes('property') ||
-                        e.localName === 'content' || e.tagName.includes('content')
-                    );
-
-                    return {
-                        key,
-                        type,
-                        description,
-                        value,
-                        units,
-                        level,
-                        isContent: false,
-                        children: allChildren.map(child => {
-                            if (child.localName === 'content' || child.tagName.includes('content')) {
-                                return parseContentElement(child, level + 1);
-                            }
-                            return parsePropertyRecursive(child, level + 1);
-                        })
-                    };
-                }
-
-                // プロパティを階層的に表示する関数
+                // 階層的に表示する関数
                 function renderPropertyRows(propData) {
                     let rows = '';
                     const indent = '　'.repeat(propData.level); // 全角スペースでインデント
@@ -5695,7 +5657,6 @@ pkijs/build/index.es.js:
         <td><div class="value-cell-scroll">${esc(propData.value)}</div></td>
     </tr>`;
 
-                    // 子要素を再帰的に表示
                     propData.children.forEach(child => {
                         rows += renderPropertyRows(child);
                     });
@@ -5703,11 +5664,11 @@ pkijs/build/index.es.js:
                     return rows;
                 }
 
-                if (directProperties.length > 0) {
+                if (directItems.length > 0) {
                     html += '<h3 style="margin-top:1rem;">📋 Global Properties</h3><table>';
                     html += '<tr><th>Key</th><th>Type</th><th>Description</th><th>Units</th><th>Value</th></tr>';
 
-                    directProperties.forEach(prop => {
+                    directItems.forEach(prop => {
                         const propData = parsePropertyRecursive(prop, 0);
                         html += renderPropertyRows(propData);
                     });
@@ -5744,8 +5705,8 @@ pkijs/build/index.es.js:
                             }
                         });
 
-                        if (directProperties.length > 0) {
-                            directProperties.forEach(prop => {
+                        if (directItems.length > 0) {
+                            directItems.forEach(prop => {
                                 infoObj.properties.push(parsePropertyRecursive(prop, 0));
                             });
                         }
@@ -5798,7 +5759,7 @@ pkijs/build/index.es.js:
                     }
                 }
 
-                if (rowCount === 0 && directProperties.length === 0) {
+                if (rowCount === 0 && directItems.length === 0) {
                     if (!append) {
                         $documentInfo.innerHTML = '<h3>📄 Document Metadata</h3><div class="empty-state">No metadata found</div>';
                     }
@@ -6755,24 +6716,13 @@ pkijs/build/index.es.js:
                     const valueEl = Array.from(el.children || []).find(x => local(x) === 'value');
                     const value = valueEl ? valueEl.textContent.trim() : (el.getAttribute('value') || '');
 
-                    // 子要素を取得（property要素とcontent要素の両方）
-                    const directChildren = Array.from(el.children || []);
-                    const childProperties = directChildren.filter(e => {
+                    // 子要素を DOM 順で取得（property と content の両方）
+                    const children = [];
+                    for (const e of Array.from(el.children || [])) {
                         const tagName = local(e);
-                        return tagName === 'property';
-                    });
-                    const childContents = directChildren.filter(e => {
-                        const tagName = local(e);
-                        return tagName === 'content';
-                    });
-
-                    // 子property要素を再帰的に処理
-                    const children = childProperties.map(childEl => readProperty(childEl));
-
-                    // 子content要素も処理して追加
-                    childContents.forEach(childEl => {
-                        children.push(readContent(childEl));
-                    });
+                        if (tagName === 'property') children.push(readProperty(e));
+                        else if (tagName === 'content') children.push(readContent(e));
+                    }
 
                     return { kind: 'property', key, name, type, description, value, units, fstring, scaleFactor, size, axis, children };
                 }
@@ -6821,13 +6771,13 @@ pkijs/build/index.es.js:
                     const valueEl = Array.from(el.children || []).find(x => local(x) === 'value');
                     const value = valueEl ? valueEl.textContent.trim() : (el.getAttribute('value') || '');
 
-                    // 子content要素を取得
-                    const directChildren = Array.from(el.children || []);
-                    const childContents = directChildren.filter(e => {
+                    // 子要素を DOM 順で取得（content は property も子に持てる）
+                    const children = [];
+                    for (const e of Array.from(el.children || [])) {
                         const tagName = local(e);
-                        return tagName === 'content';
-                    });
-                    const children = childContents.map(childEl => readContent(childEl));
+                        if (tagName === 'property') children.push(readProperty(e));
+                        else if (tagName === 'content') children.push(readContent(e));
+                    }
 
                     return { kind: 'content', key, name, type, description, value, units, fstring, scaleFactor, size, axis, children };
                 }
@@ -9045,6 +8995,7 @@ pkijs/build/index.es.js:
                     for (const child of Array.from(el.children || [])) {
                         const ln = localName(child);
                         if (ln === 'content') children.push(readCont(child));
+                        else if (ln === 'property') children.push(readProp(child));
                         else if (ln === 'uncertainty') children.push(readUncert(child));
                     }
                     return { kind: 'content', key, type, description, value, units, fstring, scaleFactor, size, axis, children };
@@ -10464,7 +10415,7 @@ pkijs/build/index.es.js:
                             function addProps(props, path = '') {
                                 props.forEach(p => {
                                     const pPath = path ? `${path}.${p.key}` : p.key;
-                                    docRows.push({ 'Item': `Prop: ${pPath}`, 'Value': p.value || '' });
+                                    docRows.push({ 'Item': `${p.kind === 'content' ? 'Content' : 'Prop'}: ${pPath}`, 'Value': p.value || '' });
                                     if (p.children) addProps(p.children, pPath);
                                 });
                             }
@@ -10745,7 +10696,7 @@ pkijs/build/index.es.js:
                         function addProps(props, path = '') {
                             props.forEach(p => {
                                 const pPath = path ? `${path}.${p.key}` : p.key;
-                                csvContent += arrayToCSVRow([`Prop: ${pPath}`, p.value || '']);
+                                csvContent += arrayToCSVRow([`${p.kind === 'content' ? 'Content' : 'Prop'}: ${pPath}`, p.value || '']);
                                 if (p.children) addProps(p.children, pPath);
                             });
                         }

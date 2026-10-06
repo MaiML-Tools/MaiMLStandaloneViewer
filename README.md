@@ -34,6 +34,7 @@ MaiML (Measurement Analysis Instrument Markup Language) ファイルを可視化
 - **ドキュメント情報パネル**：作成者、UUID、説明、ベンダー情報の一元表示
 - **詳細パネル**：選択ノードの関連テンプレート・インスタンス情報を表示
 - **テンプレート・インスタンスの階層表示**：ノード選択で該当データを自動抽出
+- **入れ子の property / content に対応**：Global Properties・テンプレート・インスタンスで、どの型の要素も子の property / content を階層表示（値と子の併存も可）
 
 ### 📁 ファイル対応
 - **.maiml ファイル対応**：MaiML 標準フォーマットを完全サポート

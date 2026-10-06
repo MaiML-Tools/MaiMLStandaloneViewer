@@ -29,6 +29,7 @@ A standalone web application for visualizing and analyzing MaiML (Measurement An
 - **Document Info panel**: unified display of author, UUID, description, and vendor information
 - **Detail panel**: displays related template/instance information for the selected node
 - **Template/instance hierarchy view**: automatically extracts the relevant data when a node is selected
+- **Nested property / content support**: in Global Properties, templates, and instances, any type can hold child property / content elements, shown hierarchically (a parent may carry both a value and children)
 
 ### 📁 File Support
 - **`.maiml` file support**: full support for the MaiML standard format
